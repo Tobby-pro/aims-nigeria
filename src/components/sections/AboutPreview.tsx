@@ -1,4 +1,6 @@
+// components/layout/AboutPreview.tsx
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import Container from "../Container";
 
 const AboutPreview = () => {
@@ -8,7 +10,7 @@ const AboutPreview = () => {
     <section className="py-20 bg-white">
       <Container>
         <div className="flex flex-col lg:flex-row items-center gap-12">
-          
+
           {/* LEFT CONTENT */}
           <div className="flex-1 max-w-xl">
             {/* Badge */}
@@ -16,9 +18,9 @@ const AboutPreview = () => {
               Certified Professional Body
             </span>
 
-            {/* Heading (short, clean, not repetitive) */}
+            {/* Heading */}
             <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4 leading-tight">
-             Association for Information and Management Science, Nigeria
+              Association for Information and Management Science, Nigeria
             </h2>
 
             {/* Core Preview */}
@@ -47,12 +49,13 @@ const AboutPreview = () => {
                 {expanded ? "Show Less ↑" : "Read More ↓"}
               </button>
 
-              <a
-                href="/about"
+              {/* ✅ FIXED SPA LINK */}
+              <Link
+                to="/about"
                 className="font-semibold text-gray-900 hover:text-indigo-600 transition"
               >
                 Full Profile →
-              </a>
+              </Link>
             </div>
           </div>
 

@@ -1,6 +1,9 @@
 // components/layout/Hero.tsx
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import Container from "../Container";
+
+const MotionLink = motion(Link);
 
 const Hero = () => {
   return (
@@ -58,9 +61,9 @@ const Hero = () => {
             Established under Act No. 1 of 1990 Part C
           </motion.p>
 
-          {/* CTA */}
-          <motion.a
-            href="/about"
+          {/* ✅ FIXED CTA */}
+          <MotionLink
+            to="/about"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.5, duration: 0.4 }}
@@ -69,7 +72,7 @@ const Hero = () => {
             className="inline-block w-fit px-5 py-3 text-sm sm:text-base bg-white text-indigo-700 font-semibold rounded shadow hover:bg-gray-100 transition"
           >
             Learn More
-          </motion.a>
+          </MotionLink>
         </motion.div>
       </Container>
     </section>
