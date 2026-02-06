@@ -17,10 +17,10 @@ const PageHeader = ({ title, subtitle, backgroundImage }: PageHeaderProps) => {
         style={{ backgroundImage: `url(${backgroundImage})` }}
       />
 
-      {/* Brand gradient overlay (matches Hero feel) */}
+      {/* Brand gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-r from-violet-900/85 via-indigo-800/80 to-violet-700/70" />
 
-      {/* Dark edge vignette for depth */}
+      {/* Dark edge vignette */}
       <div
         className="absolute inset-0"
         style={{
@@ -36,7 +36,8 @@ const PageHeader = ({ title, subtitle, backgroundImage }: PageHeaderProps) => {
 
       {/* Content */}
       <Container>
-        <div className="relative z-10 h-full flex flex-col justify-center max-w-3xl text-white">
+        {/* 👇 THIS IS THE REAL FIX */}
+        <div className="relative z-10 min-h-[45vh] flex flex-col justify-center max-w-3xl text-white">
           <motion.h1
             initial={{ opacity: 0, y: 25 }}
             animate={{ opacity: 1, y: 0 }}
