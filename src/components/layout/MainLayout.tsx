@@ -5,6 +5,7 @@ import TopBar from "./TopBar";
 import HeaderInfo from "./HeaderInfo";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import ScrollToTop from "./ScrollToTop";
 
 const MainLayout = () => {
   return (
@@ -18,10 +19,15 @@ const MainLayout = () => {
       {/* ---------------- Navbar (Fixed) ---------------- */}
       <Navbar />
 
+      {/* 🔑 GLOBAL SCROLL RESET ON ROUTE CHANGE */}
+      <ScrollToTop />
+
       {/* ---------------- Main Content ---------------- */}
       <main className="pt-[144px]">
-        {/* 
-          padding-top = TopBar (40px) + HeaderInfo (40px) + Navbar (64px)
+        {/*
+          padding-top = TopBar (40px)
+                       + HeaderInfo (40px)
+                       + Navbar (64px)
           ensures content is fully visible below fixed navbar
         */}
         <Outlet />
