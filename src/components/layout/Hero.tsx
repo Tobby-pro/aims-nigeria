@@ -22,7 +22,7 @@ const Hero = () => {
         className="absolute inset-0"
         style={{
           background: `linear-gradient(
-            to right, 
+            to right,
             rgba(0,0,0,0.5) 0%,
             rgba(0,0,0,0) 20%,
             rgba(0,0,0,0) 80%,
@@ -61,7 +61,7 @@ const Hero = () => {
             Established under Act No. 1 of 1990 Part C
           </motion.p>
 
-          {/* ✅ FIXED CTA */}
+          {/* Existing CTA — untouched */}
           <MotionLink
             to="/about"
             initial={{ opacity: 0, scale: 0.95 }}
@@ -75,6 +75,28 @@ const Hero = () => {
           </MotionLink>
         </motion.div>
       </Container>
+
+      {/* 🔥 Floating CTA — SAME DESTINATION AS NAVBAR */}
+      <MotionLink
+        to="/signup"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.8, duration: 0.4 }}
+        whileHover={{ scale: 1.06 }}
+        whileTap={{ scale: 0.97 }}
+        className="
+          absolute bottom-8 right-8 z-20
+          px-6 py-3 text-sm sm:text-base
+          text-white font-semibold
+          border border-white/70
+          rounded-full
+          hover:bg-white/10
+          backdrop-blur-sm
+          transition
+        "
+      >
+        Become a Member
+      </MotionLink>
     </section>
   );
 };
