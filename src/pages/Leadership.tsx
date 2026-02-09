@@ -1,9 +1,9 @@
 // pages/Leadership.tsx
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import PageHeader from "../components/layout/PageHeader"; // ✅ fixed path
+import PageHeader from "../components/layout/PageHeader";
 import Container from "../components/Container";
-import BackButton from "../components/layout/BackButton"; // ✅ imported back button
+import BackButton from "../components/layout/BackButton";
 
 type TeamSection = {
   title: string;
@@ -54,96 +54,114 @@ const teamData: TeamSection[] = [
   },
   {
     title: "Advisory Board",
-    members: [
-      "Prof Segun Folorunso",
-      "Dr T.A Okeowo",
-      "", // placeholder
-      "", // placeholder
-      "",
-    ],
+    members: ["Prof Segun Folorunso", "Dr T.A Okeowo"],
   },
 ];
 
 const Leadership = () => {
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const accordionRef = useRef<HTMLDivElement | null>(null);
 
-  const toggleAccordion = (index: number) => {
-    setOpenIndex(prev => (prev === index ? null : index));
-  };
+  // 👉 Auto-focus user on accordion when page loads
+  useEffect(() => {
+    accordionRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, []);
 
   return (
     <>
-      {/* Back Button at the top with spacing */}
       <Container className="pt-4">
         <BackButton fallbackPath="/" />
       </Container>
 
-      {/* Page Header */}
       <PageHeader
         title="Leadership & Governance"
-        subtitle="Meet the Teams Driving AIMS Nigeria"
+        subtitle="The people guiding the vision and integrity of AIMS Nigeria"
         backgroundImage="/images/buses.png"
       />
 
-      {/* Page Content */}
       <Container>
-        <div className="py-16 max-w-3xl mx-auto space-y-6">
-          {/* Captivating Intro */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center text-gray-700 text-base sm:text-lg md:text-base leading-relaxed px-4"
-          >
-            At AIMS Nigeria, our leadership team, coordinators, and boards
-            work tirelessly to ensure excellence in all our programs and
-            initiatives. Explore the teams below to learn more about the
-            people driving our vision.
-          </motion.div>
+        <div
+          ref={accordionRef}
+          className="py-16 grid grid-cols-1 lg:grid-cols-2 gap-10 items-start"
+        >
+          {/* ================= LEFT: ACCORDION ================= */}
+          <div className="space-y-4">
+            {teamData.map((section, index) => {
+              const isOpen = openIndex === index;
+              const previewMembers = section.members.slice(0, 2);
 
-          {/* Accordion Sections */}
-          {teamData.map((section, index) => (
-            <motion.div
-              key={section.title}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: index * 0.1 }}
-              className="border rounded-md overflow-hidden shadow-sm"
-            >
-              {/* Accordion Header */}
-              <motion.button
-                onClick={() => toggleAccordion(index)}
-                className="w-full flex justify-between items-center px-4 py-3 bg-indigo-50 text-indigo-800 font-medium text-left focus:outline-none text-sm sm:text-base"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <span>{section.title}</span>
-                <motion.span
-                  animate={{ rotate: openIndex === index ? 180 : 0 }}
-                  transition={{ duration: 0.3 }}
+              return (
+                <motion.div
+                  key={section.title}
+                  className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
                 >
-                  ▼
-                </motion.span>
-              </motion.button>
-
-              {/* Accordion Body */}
-              <AnimatePresence>
-                {openIndex === index && (
-                  <motion.ul
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="px-6 py-3 bg-white text-gray-700 list-disc list-inside space-y-1 text-sm sm:text-base"
+                  {/* Header */}
+                  <button
+                    onClick={() =>
+                      setOpenIndex(isOpen ? null : index)
+                    }
+                    className="w-full px-5 py-4 flex justify-between items-center text-left"
                   >
-                    {section.members.map((member, idx) => (
-                      <li key={idx}>{member || "—"}</li>
-                    ))}
-                  </motion.ul>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          ))}
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-900">
+                        {section.title}
+                      </h3>
+
+                      {!isOpen && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          {previewMembers.join(", ")}
+                          {section.members.length > 2 && " …"}
+                        </p>
+                      )}
+                    </div>
+
+                    <motion.span
+                      animate={{ rotate: isOpen ? 180 : 0 }}
+                      transition={{ duration: 0.25 }}
+                      className="text-gray-400"
+                    >
+                      ▼
+                    </motion.span>
+                  </button>
+
+                  {/* Body */}
+                  <AnimatePresence>
+                    {isOpen && (
+                      <motion.ul
+                        initial={{ opacity: 0, y: -6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={{ duration: 0.25 }}
+                        className="px-6 pb-5 space-y-2 text-sm text-gray-700"
+                      >
+                        {section.members.map((member, idx) => (
+                          <li
+                            key={idx}
+                            className="flex items-center gap-2"
+                          >
+                            <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full" />
+                            {member}
+                          </li>
+                        ))}
+                      </motion.ul>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              );
+            })}
+          </div>
+
+          {/* ================= RIGHT: IMAGE ================= */}
+          <div className="hidden lg:block sticky top-24">
+            <img
+              src="/images/leads_pro.png"
+              alt="AIMS Leadership"
+              className="rounded-2xl shadow-lg object-cover w-full"
+            />
+          </div>
         </div>
       </Container>
     </>

@@ -1,8 +1,19 @@
+import { useEffect, useRef } from "react";
 import PageHeader from "../components/layout/PageHeader";
 import Container from "../components/Container";
 import BackButton from "../components/layout/BackButton";
 
 const Signup = () => {
+  // ---- refs ----
+  const formRef = useRef<HTMLDivElement | null>(null);
+  const firstInputRef = useRef<HTMLInputElement | null>(null);
+
+  // ---- auto scroll + focus on load ----
+  useEffect(() => {
+    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    firstInputRef.current?.focus();
+  }, []);
+
   return (
     <>
       <Container className="pt-4">
@@ -16,122 +27,115 @@ const Signup = () => {
       />
 
       <Container>
-        <div className="py-12 max-w-md mx-auto tt-form-wrap">
-          <div className="tt-form-container bg-white shadow-lg rounded-xl overflow-hidden">
-            <div className="tt-form-content p-6">
-
-              {/* Top Info Section */}
-              <div className="mb-5 text-center p-3 -mx-6 bg-indigo-100">
-                <p className="text-sm text-indigo-800">
-                  Complete the form to proceed with your membership application.
+        <div className="py-12 flex justify-center">
+          <div
+            ref={formRef}
+            className="
+              w-full max-w-4xl
+              grid grid-cols-1 md:grid-cols-2
+              bg-white rounded-xl shadow-lg overflow-hidden
+            "
+          >
+            {/* ================= LEFT: FORM ================= */}
+            <div className="p-6 md:p-8">
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Create your account
+                </h3>
+                <p className="text-xs text-gray-500 mt-1">
+                  Register to access AIMS membership services.
                 </p>
               </div>
 
               <form className="space-y-3 text-sm">
-
-                {/* Full Name */}
-                <div className="form-group">
-                  <label htmlFor="fullName" className="block text-xs font-medium text-gray-700 mb-1">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
                     Full Name
                   </label>
                   <input
+                    ref={firstInputRef}
                     type="text"
-                    id="fullName"
-                    placeholder="Tobi john"
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    placeholder="Tobi John"
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-1 focus:ring-indigo-500 outline-none"
                   />
                 </div>
 
-                {/* Email */}
-                <div className="form-group">
-                  <label htmlFor="email" className="block text-xs font-medium text-gray-700 mb-1">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
                     Email Address
                   </label>
-                  <div className="relative">
-                    <input
-                      type="email"
-                      id="email"
-                      placeholder="tobijohn@gmail.com"
-                      className="w-full rounded-md border border-gray-300 px-3 py-2 pr-9 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                    />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
-                      📧
-                    </span>
-                  </div>
+                  <input
+                    type="email"
+                    placeholder="tobijohn@gmail.com"
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-1 focus:ring-indigo-500 outline-none"
+                  />
                 </div>
 
-                {/* Phone Number */}
-                <div className="form-group">
-                  <label htmlFor="phone" className="block text-xs font-medium text-gray-700 mb-1">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
                     Phone Number
                   </label>
                   <input
                     type="tel"
-                    id="phone"
                     placeholder="08012345678"
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-1 focus:ring-indigo-500 outline-none"
                   />
                 </div>
 
-                {/* Membership Category */}
-                <div className="form-group">
-                  <label htmlFor="category" className="block text-xs font-medium text-gray-700 mb-1">
-                    Membership Category
-                  </label>
-                  <select
-                    id="category"
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  >
-                    <option value="">Select Category</option>
-                    <option value="associate">Associate</option>
-                    <option value="graduate">Graduate</option>
-                    <option value="student">Student</option>
-                    <option value="full">Full Member</option>
-                    <option value="fellow">Fellow</option>
-                    <option value="corporate">Corporate Member</option>
-                    <option value="corporate-fellow">Corporate Fellow</option>
-                  </select>
+                <button
+                  type="submit"
+                  className="w-full mt-4 bg-indigo-600 text-white py-2 rounded-md text-sm hover:bg-indigo-700 transition"
+                >
+                  Create Account
+                </button>
+              </form>
+            </div>
+
+            {/* ================= RIGHT: CLAY IMAGE + GLASS ================= */}
+            <div
+              className="relative flex items-end justify-center p-6"
+              style={{
+                backgroundImage: "url('/images/login_pro01.png')",
+                backgroundSize: "cover",
+                backgroundPosition: "top center",
+                backgroundRepeat: "no-repeat",
+              }}
+            >
+              {/* Glass Card — lowered */}
+              <div
+                className="
+                  mb-6
+                  backdrop-blur-xl bg-white/20
+                  border border-white/30
+                  rounded-2xl p-6 max-w-sm
+                  shadow-2xl
+                "
+              >
+                <div className="flex gap-1 mb-3 text-yellow-400">
+                  ⭐ ⭐ ⭐ ⭐ ⭐
                 </div>
 
-                {/* Password */}
-                <div className="form-group">
-                  <label htmlFor="password" className="block text-xs font-medium text-gray-700 mb-1">
-                    Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="password"
-                      id="password"
-                      placeholder="Password"
-                      className="w-full h-[40px] rounded-md border border-gray-300 px-3 pr-9 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                    />
-                    <button
-                      type="button"
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"
-                    >
-                      👁️
-                    </button>
+                <p className="text-sm leading-relaxed text-gray-800">
+                  “AIMS gives professionals credibility, structure, and real growth.
+                  Being a member opened doors for me.”
+                </p>
+
+                <div className="flex items-center gap-3 mt-4">
+                  <img
+                    src="/images/baby01.jpg"
+                    alt="member"
+                    className="w-10 h-10 rounded-full object-cover border border-white/40"
+                  />
+                  <div>
+                    <p className="text-sm font-semibold text-indigo-600">
+                      AIMS Member
+                    </p>
+                    <span className="text-xs text-gray-600">
+                      Verified Professional
+                    </span>
                   </div>
                 </div>
-
-                {/* Submit */}
-                <div className="mt-5">
-                  <button
-                    type="submit"
-                    className="w-full bg-indigo-600 text-white py-2 rounded-md text-sm hover:bg-indigo-700 transition"
-                  >
-                    Submit Application
-                  </button>
-                </div>
-              </form>
-
-              {/* Testimonial */}
-              <div className="mt-6 p-4 rounded-lg bg-gray-100">
-                <p className="text-gray-600 text-center text-xs italic">
-                  “Joining AIMS has transformed my career — truly a professional community.”
-                </p>
               </div>
-
             </div>
           </div>
         </div>
