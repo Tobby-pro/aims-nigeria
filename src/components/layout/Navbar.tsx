@@ -1,4 +1,5 @@
 // components/layout/Navbar.tsx
+
 import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { FiLogIn, FiUserPlus, FiChevronDown, FiUser } from "react-icons/fi";
@@ -75,11 +76,14 @@ const Navbar = () => {
     setAuthOpen(false);
   };
 
-  /* ------------------ FIX: Navbar top offset ------------------ */
+  /* ------------------ KEEP YOUR OFFSET ------------------ */
   const NAVBAR_TOP_OFFSET = 80; // 40 + 40 px total
 
   return (
-    <header className="fixed left-0 w-full bg-white shadow-md z-50" style={{ top: NAVBAR_TOP_OFFSET }}>
+    <header
+      className="fixed left-0 w-full z-50 shadow-md bg-white/80 backdrop-blur-md"
+      style={{ top: NAVBAR_TOP_OFFSET }}
+    >
       <Container>
         <nav className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -196,7 +200,6 @@ const Navbar = () => {
               </AnimatePresence>
             </div>
 
-            {/* Hamburger toggle */}
             <button onClick={() => setMobileOpen(prev => !prev)} className="text-gray-700 text-xl">
               {mobileOpen ? "✕" : "☰"}
             </button>
