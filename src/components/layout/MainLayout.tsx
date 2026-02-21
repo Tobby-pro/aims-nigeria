@@ -1,41 +1,16 @@
 // components/layout/MainLayout.tsx
-import { Outlet } from "react-router-dom";
-
-import TopBar from "./TopBar";
-import HeaderInfo from "./HeaderInfo";
-import Navbar from "./Navbar";
-import Footer from "./Footer";
-import ScrollToTop from "./ScrollToTop";
 
 const MainLayout = () => {
   return (
-    <>
-      {/* ---------------- Top Bar ---------------- */}
-      <TopBar />
-
-      {/* ---------------- Header Info ---------------- */}
-      <HeaderInfo />
-
-      {/* ---------------- Navbar (Fixed) ---------------- */}
-      <Navbar />
-
-      {/* 🔑 GLOBAL SCROLL RESET ON ROUTE CHANGE */}
-      <ScrollToTop />
-
-      {/* ---------------- Main Content ---------------- */}
-      <main className="pt-[144px]">
-        {/*
-          padding-top = TopBar (40px)
-                       + HeaderInfo (40px)
-                       + Navbar (64px)
-          ensures content is fully visible below fixed navbar
-        */}
-        <Outlet />
-      </main>
-
-      {/* ---------------- Footer ---------------- */}
-      <Footer />
-    </>
+    <div className="flex flex-col items-center justify-center h-screen bg-gray-100 px-4 text-center">
+      <h1 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-4">
+        Website Temporarily Unavailable
+      </h1>
+      <p className="text-gray-600 max-w-md text-lg">
+        This website is currently undergoing scheduled administrative review. 
+        Please contact the site administrator for further information.
+      </p>
+    </div>
   );
 };
 

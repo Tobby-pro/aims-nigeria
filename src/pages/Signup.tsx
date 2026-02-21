@@ -1,18 +1,82 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import axios from "axios";
 import PageHeader from "../components/layout/PageHeader";
 import Container from "../components/Container";
 import BackButton from "../components/layout/BackButton";
 
+interface Category {
+  id: number;
+  name: string;
+  description: string;
+}
+
 const Signup = () => {
-  // ---- refs ----
   const formRef = useRef<HTMLDivElement | null>(null);
   const firstInputRef = useRef<HTMLInputElement | null>(null);
 
-  // ---- auto scroll + focus on load ----
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [categoryId, setCategoryId] = useState<number | "">("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+
+  // Auto scroll + focus
   useEffect(() => {
     formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     firstInputRef.current?.focus();
   }, []);
+
+  // Fetch membership categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await axios.get(
+          "http://localhost:3000/api/membership-categories"
+        );
+        setCategories(res.data.data);
+      } catch (err) {
+        console.error("Failed to fetch categories", err);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  // Handle Submit
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!fullName || !email || !categoryId) {
+      setMessage("Please fill all required fields.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setMessage("");
+
+      await axios.post("http://localhost:3000/api/members/register", {
+        full_name: fullName,
+        email,
+        category_id: categoryId,
+      });
+
+      setMessage(
+        "✅ Registration successful. Please check your email to verify."
+      );
+
+      setFullName("");
+      setEmail("");
+      setCategoryId("");
+    } catch (err: any) {
+      setMessage(
+        err?.response?.data?.message || "Registration failed. Try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
@@ -30,68 +94,79 @@ const Signup = () => {
         <div className="py-12 flex justify-center">
           <div
             ref={formRef}
-            className="
-              w-full max-w-4xl
-              grid grid-cols-1 md:grid-cols-2
-              bg-white rounded-xl shadow-lg overflow-hidden
-            "
+            className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 bg-white rounded-xl shadow-lg overflow-hidden"
           >
-            {/* ================= LEFT: FORM ================= */}
+            {/* LEFT SIDE */}
             <div className="p-6 md:p-8">
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Create your account
-                </h3>
-                <p className="text-xs text-gray-500 mt-1">
-                  Register to access AIMS membership services.
-                </p>
-              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Join AIMS Membership
+              </h3>
 
-              <form className="space-y-3 text-sm">
+              <form onSubmit={handleSubmit} className="space-y-4 text-sm">
+                {/* Full Name */}
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-medium mb-1">
                     Full Name
                   </label>
                   <input
                     ref={firstInputRef}
                     type="text"
-                    placeholder="Tobi John"
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-1 focus:ring-indigo-500 outline-none"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className="w-full rounded-md border px-3 py-2"
                   />
                 </div>
 
+                {/* Email */}
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-medium mb-1">
                     Email Address
                   </label>
                   <input
                     type="email"
-                    placeholder="tobijohn@gmail.com"
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-1 focus:ring-indigo-500 outline-none"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full rounded-md border px-3 py-2"
                   />
                 </div>
 
+                {/* Membership Category */}
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Phone Number
+                  <label className="block text-xs font-medium mb-1">
+                    Membership Category
                   </label>
-                  <input
-                    type="tel"
-                    placeholder="08012345678"
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-1 focus:ring-indigo-500 outline-none"
-                  />
+                  <select
+                    value={categoryId}
+                    onChange={(e) =>
+                      setCategoryId(Number(e.target.value))
+                    }
+                    className="w-full rounded-md border px-3 py-2"
+                  >
+                    <option value="">Select category</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
+                {/* Submit */}
                 <button
                   type="submit"
-                  className="w-full mt-4 bg-indigo-600 text-white py-2 rounded-md text-sm hover:bg-indigo-700 transition"
+                  disabled={loading}
+                  className="w-full bg-indigo-600 text-white py-2 rounded-md"
                 >
-                  Create Account
+                  {loading ? "Processing..." : "Become a Member"}
                 </button>
+
+                {message && (
+                  <p className="text-sm mt-2 text-center">{message}</p>
+                )}
               </form>
             </div>
 
-            {/* ================= RIGHT: CLAY IMAGE + GLASS ================= */}
+            {/* RIGHT SIDE IMAGE */}
             <div
               className="relative flex items-end justify-center p-6"
               style={{
@@ -100,43 +175,7 @@ const Signup = () => {
                 backgroundPosition: "top center",
                 backgroundRepeat: "no-repeat",
               }}
-            >
-              {/* Glass Card — lowered */}
-              <div
-                className="
-                  mb-6
-                  backdrop-blur-xl bg-white/20
-                  border border-white/30
-                  rounded-2xl p-6 max-w-sm
-                  shadow-2xl
-                "
-              >
-                <div className="flex gap-1 mb-3 text-yellow-400">
-                  ⭐ ⭐ ⭐ ⭐ ⭐
-                </div>
-
-                <p className="text-sm leading-relaxed text-gray-800">
-                  “AIMS gives professionals credibility, structure, and real growth.
-                  Being a member opened doors for me.”
-                </p>
-
-                <div className="flex items-center gap-3 mt-4">
-                  <img
-                    src="/images/baby01.jpg"
-                    alt="member"
-                    className="w-10 h-10 rounded-full object-cover border border-white/40"
-                  />
-                  <div>
-                    <p className="text-sm font-semibold text-indigo-600">
-                      AIMS Member
-                    </p>
-                    <span className="text-xs text-gray-600">
-                      Verified Professional
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            />
           </div>
         </div>
       </Container>
@@ -145,3 +184,4 @@ const Signup = () => {
 };
 
 export default Signup;
+   
