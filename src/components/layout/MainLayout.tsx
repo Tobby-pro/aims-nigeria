@@ -1,40 +1,21 @@
-import { Outlet } from "react-router-dom";
-
-import TopBar from "./TopBar";
-import HeaderInfo from "./HeaderInfo";
-import Navbar from "./Navbar";
-import Footer from "./Footer";
-import ScrollToTop from "./ScrollToTop";
+// src/components/layout/MainLayout.tsx
 
 const MainLayout = () => {
   return (
-    <>
-      {/* ---------------- Top Bar ---------------- */}
-      <TopBar />
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-100 via-gray-200 to-gray-100 px-4">
+      <div className="bg-white/80 backdrop-blur-md shadow-xl rounded-2xl p-10 max-w-lg w-full text-center border border-gray-200">
+        <h1 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-4">
+          Website Temporarily Unavailable
+        </h1>
 
-      {/* ---------------- Header Info ---------------- */}
-      <HeaderInfo />
+        <p className="text-gray-600 text-lg leading-relaxed">
+          This website is currently undergoing scheduled administrative review.
+          Please contact the site administrator for further information.
+        </p>
 
-      {/* ---------------- Navbar (Fixed) ---------------- */}
-      <Navbar />
-
-      {/* 🔑 GLOBAL SCROLL RESET ON ROUTE CHANGE */}
-      <ScrollToTop />
-
-      {/* ---------------- Main Content ---------------- */}
-      <main className="pt-[144px]">
-        {/*
-          padding-top = TopBar (40px)
-                       + HeaderInfo (40px)
-                       + Navbar (64px)
-          ensures content is fully visible below fixed navbar
-        */}
-        <Outlet />
-      </main>
-
-      {/* ---------------- Footer ---------------- */}
-      <Footer />
-    </>
+        <div className="mt-6 h-1 w-16 bg-gray-900 mx-auto rounded-full opacity-70"></div>
+      </div>
+    </div>
   );
 };
 
