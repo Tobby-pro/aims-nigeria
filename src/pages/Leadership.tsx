@@ -12,49 +12,46 @@ type TeamSection = {
 
 const teamData: TeamSection[] = [
   {
+    title: "Governing Board",
+    members: [
+      "Dr. Adeyinka Bakare",
+      "Engr. Dr. Ezekiel Odinmayo",
+      "Mr. Durosimi Adekunle",
+      "Prof. Adedeji Oyenuga",
+      "Dr. Samuel Adekunle",
+      "Mr. Tayo Olatunbosun",
+      "Barr. Sunday Fiola",
+      "Engr. Akeem Bayewu",
+      "Dr. Adeosun Olayiwola",
+      "Prof. Amusa Nojimu Adetunji",
+    ],
+  },
+  {
     title: "Management Team",
     members: [
-      "Dr Lucky",
-      "Mr Awe O. J",
-      "Barr Sunday Fiola",
+      "Dr. Lucky",
+      "Mr. Awe O. J",
+      "Barr. Sunday Fiola",
       "Favour Adekunle",
-      "Mr Faithful",
-      "Mr Tijani Ademola",
-      "Mr Olatubosun",
-      "Mr Koleosho",
-      "Mr Emmanuel Akinsade",
-      "Mr Wasiu Olalekan",
-      "Mr Alleh Segun",
-      "Mr Fatola",
+      "Mr. Faithful",
+      "Mr. Tijani Ademola",
+      "Mr. Dandy Makpah",
+      "Mr. Koleosho",
+      "Mr. Emmanuel Akinsade",
+      "Mr. Wasiu Olalekan",
+      "Mr. Alleh Segun",
+      "Mr. Fatola",
     ],
   },
   {
     title: "Program Coordinators",
     members: [
-      "Mr Adeboye",
-      "Mr Dahood",
-      "Mr Ishola Kolawole",
-      "Mr Oduntan Oluwatoyin",
-      "Mr Abidoye",
+      "Mr. Adeboye",
+      "Mr. Dahood",
+      "Mr. Ishola Kolawole",
+      "Mr. Oduntan Oluwatoyin",
+      "Mr. Abidoye",
     ],
-  },
-  {
-    title: "Governing Board",
-    members: [
-      "Dr Adeyinka Bakare",
-      "Engr Dr Ezekiel Odinmayo",
-      "Mr Durosimi Adekunle",
-      "Prof Adedeji Oyenuga",
-      "Dr Samuel Adekunle",
-      "Dr Lucky",
-      "Barr Sunday Fiola",
-      "Engr Akeem Bayewu",
-      "Dr Adeosun Olayiwola",
-    ],
-  },
-  {
-    title: "Advisory Board",
-    members: ["Prof Segun Folorunso", "Dr T.A Okeowo"],
   },
 ];
 
@@ -62,7 +59,7 @@ const Leadership = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
   const accordionRef = useRef<HTMLDivElement | null>(null);
 
-  // 👉 Auto-focus user on accordion when page loads
+  // Auto-focus user on accordion when page loads
   useEffect(() => {
     accordionRef.current?.scrollIntoView({
       behavior: "smooth",
@@ -100,9 +97,7 @@ const Leadership = () => {
                 >
                   {/* Header */}
                   <button
-                    onClick={() =>
-                      setOpenIndex(isOpen ? null : index)
-                    }
+                    onClick={() => setOpenIndex(isOpen ? null : index)}
                     className="w-full px-5 py-4 flex justify-between items-center text-left"
                   >
                     <div>
@@ -138,10 +133,7 @@ const Leadership = () => {
                         className="px-6 pb-5 space-y-2 text-sm text-gray-700"
                       >
                         {section.members.map((member, idx) => (
-                          <li
-                            key={idx}
-                            className="flex items-center gap-2"
-                          >
+                          <li key={idx} className="flex items-center gap-2">
                             <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full" />
                             {member}
                           </li>
