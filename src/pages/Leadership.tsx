@@ -30,7 +30,7 @@ const teamData: TeamSection[] = [
     title: "Management Team",
     members: [
       "Dr. Lucky",
-      "Mr. Awe O. J",
+      "Mr. Awe Oluwafemi J.",
       "Barr. Sunday Fiola",
       "Favour Adekunle",
       "Mr. Faithful",
