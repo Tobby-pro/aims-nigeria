@@ -1,6 +1,8 @@
+// src/db/client.ts
 import { Pool } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
 import * as dotenv from "dotenv";
+import { members, payments, enrolled_fees } from "./schema"; // import tables
 
 dotenv.config();
 
@@ -12,4 +14,11 @@ const pool = new Pool({
   database: process.env.DB_NAME || "aimsn_db",
 });
 
-export const db = drizzle(pool);
+// ✅ Tell Drizzle about your schema so TypeScript recognizes all tables
+export const db = drizzle(pool, {
+  schema: {
+    members,
+    payments,
+    enrolled_fees,
+  },
+});

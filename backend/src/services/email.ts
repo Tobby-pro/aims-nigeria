@@ -1,71 +1,62 @@
 // src/services/email.ts
-import nodemailer, { Transporter } from "nodemailer";
+import nodemailer from "nodemailer";
 
 const isProduction = process.env.NODE_ENV === "production";
-const PROD_EMAIL_USER = process.env.EMAIL_USER || "";
 
-interface EmailService {
-  transporter: Transporter;
-  fromEmail: string;
+if (isProduction) {
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    throw new Error("EMAIL_USER or EMAIL_PASS not set in .env");
+  }
 }
 
-const createEmailService = async (): Promise<EmailService> => {
-  if (isProduction) {
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-      throw new Error("EMAIL_USER or EMAIL_PASS not set in .env");
-    }
+const transporter = nodemailer.createTransport({
+  host: process.env.EMAIL_HOST || "smtp.gmail.com",
+  port: Number(process.env.EMAIL_PORT) || 587,
+  secure: Number(process.env.EMAIL_PORT) === 465, // true for 465, false for 587
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS, // Gmail App Password
+  },
+});
 
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 587,
-      secure: false,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS, // App Password
-      },
-    });
+const FROM_EMAIL = process.env.EMAIL_FROM || `"AIMS Nigeria" <${process.env.EMAIL_USER}>`;
 
-    return { transporter, fromEmail: PROD_EMAIL_USER };
-  } else {
-    const testAccount = await nodemailer.createTestAccount();
-
-    console.log(
-      "🧪 Using Ethereal test account. Preview emails at: https://ethereal.email/messages"
-    );
-
-    const transporter = nodemailer.createTransport({
-      host: "smtp.ethereal.email",
-      port: 587,
-      auth: {
-        user: testAccount.user,
-        pass: testAccount.pass,
-      },
-    });
-
-    return { transporter, fromEmail: testAccount.user };
-  }
-};
-
-export const sendVerificationEmail = async (email: string, token: string) => {
-  const { transporter, fromEmail } = await createEmailService();
-
+/**
+ * Send email verification
+ */
+export const sendVerificationEmail = async (to: string, token: string) => {
   const link = `http://localhost:3000/api/members/verify?token=${token}`;
 
   const info = await transporter.sendMail({
-    from: `"AIMSN" <${fromEmail}>`,
-    to: email,
-    subject: "Verify your membership",
+    from: FROM_EMAIL,
+    to,
+    subject: "Verify Your Email",
     html: `
-      <h2>Welcome to AIMSN 👋</h2>
-      <p>Please verify your email by clicking below:</p>
-      <a href="${link}">Verify Account</a>
-      <p>This link will activate your membership.</p>
+      <h2>Welcome to AIMS Nigeria 👋</h2>
+      <p>Please verify your email by clicking the link below:</p>
+      <a href="${link}">Verify Email</a>
+      <p>After verification, you’ll be able to access all professional resources.</p>
     `,
   });
 
-  if (!isProduction) {
-    console.log("📧 Preview URL:", nodemailer.getTestMessageUrl(info));
-  } else {
-    console.log(`📧 Sending verification email to ${email} with token: ${token}`);
-  }
+  console.log(`✅ Verification email sent to ${to}`);
+};
+
+/**
+ * Send welcome email after successful verification
+ */
+export const sendWelcomeEmail = async (to: string) => {
+  const info = await transporter.sendMail({
+    from: FROM_EMAIL,
+    to,
+    subject: "Welcome to AIMS Nigeria 🎉",
+    html: `
+      <h2>Welcome to AIMS Nigeria 👋</h2>
+      <p>Congratulations! Your account has been successfully verified.</p>
+      <p>You can now access all training programs, certifications, and professional resources.</p>
+      <p>Enjoy your journey with AIMS!</p>
+    `,
+  });
+
+  console.log(`✅ Welcome email sent to ${to}`);
 };

@@ -1,77 +1,54 @@
+// src/pages/Signup.tsx
 import { useEffect, useRef, useState } from "react";
-import axios from "axios";
+import { motion } from "framer-motion";
 import PageHeader from "../components/layout/PageHeader";
 import Container from "../components/Container";
 import BackButton from "../components/layout/BackButton";
-
-interface Category {
-  id: number;
-  name: string;
-  description: string;
-}
+import { registerMember } from "../api/auth";
+import LoadingSpinner from "../components/ui/LoadingSpinner";
 
 const Signup = () => {
   const formRef = useRef<HTMLDivElement | null>(null);
-  const firstInputRef = useRef<HTMLInputElement | null>(null);
+  const emailRef = useRef<HTMLInputElement | null>(null);
 
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  const [categoryId, setCategoryId] = useState<number | "">("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [isError, setIsError] = useState(false);
 
-  // Auto scroll + focus
   useEffect(() => {
-    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    firstInputRef.current?.focus();
+    formRef.current?.scrollIntoView({ behavior: "smooth" });
+    emailRef.current?.focus();
   }, []);
 
-  // Fetch membership categories
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const res = await axios.get(
-          "http://localhost:3000/api/membership-categories"
-        );
-        setCategories(res.data.data);
-      } catch (err) {
-        console.error("Failed to fetch categories", err);
-      }
-    };
-
-    fetchCategories();
-  }, []);
-
-  // Handle Submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!fullName || !email || !categoryId) {
-      setMessage("Please fill all required fields.");
+    if (!email || !password) {
+      setIsError(true);
+      setMessage("Please fill all fields.");
       return;
     }
 
     try {
       setLoading(true);
       setMessage("");
+      setIsError(false);
 
-      await axios.post("http://localhost:3000/api/members/register", {
-        full_name: fullName,
-        email,
-        category_id: categoryId,
-      });
+      await registerMember(email, password);
 
       setMessage(
-        "✅ Registration successful. Please check your email to verify."
+        "✅ Registration successful! Check your email to verify your account."
       );
 
-      setFullName("");
       setEmail("");
-      setCategoryId("");
+      setPassword("");
     } catch (err: any) {
+      setIsError(true);
       setMessage(
-        err?.response?.data?.message || "Registration failed. Try again."
+        err?.response?.data?.message ||
+          "Registration failed. Please try again."
       );
     } finally {
       setLoading(false);
@@ -91,92 +68,95 @@ const Signup = () => {
       />
 
       <Container>
-        <div className="py-12 flex justify-center">
-          <div
+        <div className="py-16 grid md:grid-cols-2 gap-12 items-center">
+
+          {/* FORM */}
+          <motion.div
             ref={formRef}
-            className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 bg-white rounded-xl shadow-lg overflow-hidden"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="bg-white p-10 rounded-xl shadow-lg max-w-md w-full"
           >
-            {/* LEFT SIDE */}
-            <div className="p-6 md:p-8">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Join AIMS Membership
-              </h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-6">
+              Create Your Account
+            </h3>
 
-              <form onSubmit={handleSubmit} className="space-y-4 text-sm">
-                {/* Full Name */}
-                <div>
-                  <label className="block text-xs font-medium mb-1">
-                    Full Name
-                  </label>
-                  <input
-                    ref={firstInputRef}
-                    type="text"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    className="w-full rounded-md border px-3 py-2"
-                  />
-                </div>
+            <form onSubmit={handleSubmit} className="space-y-5">
 
-                {/* Email */}
-                <div>
-                  <label className="block text-xs font-medium mb-1">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full rounded-md border px-3 py-2"
-                  />
-                </div>
+              {/* EMAIL */}
+              <div>
+                <label className="block text-sm mb-1 text-gray-700">
+                  Email Address
+                </label>
 
-                {/* Membership Category */}
-                <div>
-                  <label className="block text-xs font-medium mb-1">
-                    Membership Category
-                  </label>
-                  <select
-                    value={categoryId}
-                    onChange={(e) =>
-                      setCategoryId(Number(e.target.value))
-                    }
-                    className="w-full rounded-md border px-3 py-2"
-                  >
-                    <option value="">Select category</option>
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <input
+                  ref={emailRef}
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 transition"
+                  placeholder="Enter your email"
+                />
+              </div>
 
-                {/* Submit */}
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-indigo-600 text-white py-2 rounded-md"
+              {/* PASSWORD */}
+              <div>
+                <label className="block text-sm mb-1 text-gray-700">
+                  Password
+                </label>
+
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 transition"
+                  placeholder="Enter your password"
+                />
+              </div>
+
+              {/* BUTTON */}
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                whileHover={{ scale: loading ? 1 : 1.02 }}
+                disabled={loading}
+                className={`w-full py-2.5 rounded-md text-sm font-medium flex items-center justify-center transition
+                  ${
+                    loading
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-indigo-600 hover:bg-indigo-700 text-white"
+                  }`}
+              >
+                {loading ? <LoadingSpinner /> : "Create Account"}
+              </motion.button>
+
+              {/* MESSAGE */}
+              {message && (
+                <p
+                  className={`text-sm text-center mt-3 ${
+                    isError ? "text-red-600" : "text-green-600"
+                  }`}
                 >
-                  {loading ? "Processing..." : "Become a Member"}
-                </button>
+                  {message}
+                </p>
+              )}
+            </form>
+          </motion.div>
 
-                {message && (
-                  <p className="text-sm mt-2 text-center">{message}</p>
-                )}
-              </form>
-            </div>
-
-            {/* RIGHT SIDE IMAGE */}
-            <div
-              className="relative flex items-end justify-center p-6"
-              style={{
-                backgroundImage: "url('/images/login_pro01.png')",
-                backgroundSize: "cover",
-                backgroundPosition: "top center",
-                backgroundRepeat: "no-repeat",
-              }}
+          {/* IMAGE */}
+          <motion.div
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.7 }}
+            className="flex justify-center"
+          >
+            <img
+              src="/images/login_pro01.png"
+              alt="AIMS illustration"
+              className="max-w-md w-full object-contain"
             />
-          </div>
+          </motion.div>
+
         </div>
       </Container>
     </>
@@ -184,4 +164,3 @@ const Signup = () => {
 };
 
 export default Signup;
-   

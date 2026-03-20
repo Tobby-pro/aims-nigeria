@@ -4,8 +4,12 @@ import * as dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
-import membershipCategoriesRouter from "./routes/membershipCategories";
+// ---------------------------
+// ✅ Routes
+// ---------------------------
 import membersRouter from "./routes/members";
+import paymentsRouter from "./routes/payments";
+import coursesRouter from "./routes/courses"; // NEW: for enrolled courses
 
 dotenv.config();
 
@@ -23,8 +27,8 @@ app.use(cookieParser());
 // ---------------------------
 app.use(
   cors({
-    origin: "http://localhost:5173",
-    credentials: true,
+    origin: "http://localhost:5173", // frontend URL
+    credentials: true, // allow cookies
   })
 );
 
@@ -39,8 +43,9 @@ app.use((req, res, next) => {
 // ---------------------------
 // ✅ Routes
 // ---------------------------
-app.use("/api/membership-categories", membershipCategoriesRouter);
 app.use("/api/members", membersRouter);
+app.use("/api/payments", paymentsRouter); // NEW
+app.use("/api/courses", coursesRouter);   // NEW
 
 // ---------------------------
 // ✅ Test Route for POST Debugging

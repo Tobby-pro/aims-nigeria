@@ -17,6 +17,13 @@ const Hero = () => {
       {/* Purple gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-r from-violet-900/85 via-indigo-800/80 to-violet-700/70" />
 
+      {/* 🔥 Glow Blobs for premium brand feel */}
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute top-[-15%] left-[-10%] w-[500px] h-[500px] bg-violet-700/30 blur-[120px] rounded-full animate-blob"></div>
+        <div className="absolute bottom-[-20%] right-[-5%] w-[400px] h-[400px] bg-indigo-600/25 blur-[140px] rounded-full animate-blob animation-delay-2000"></div>
+        <div className="absolute top-[20%] right-[10%] w-[300px] h-[300px] bg-purple-500/20 blur-[100px] rounded-full animate-blob animation-delay-4000"></div>
+      </div>
+
       {/* Darker edges overlay */}
       <div
         className="absolute inset-0"
