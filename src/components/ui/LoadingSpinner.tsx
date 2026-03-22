@@ -1,3 +1,4 @@
+// components/ui/LoadingSpinner.tsx
 import { motion } from "framer-motion";
 
 const LoadingSpinner = () => {

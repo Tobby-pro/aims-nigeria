@@ -16,6 +16,7 @@ import MembershipCategories from "./pages/membership/Categories";
 import MembershipBenefits from "./pages/membership/Benefits";
 
 import Dashboard from "./pages/Dashboard";
+import Verify from "./pages/Verify"; // 🔹 import the Verify page
 
 function App() {
   return (
@@ -41,6 +42,9 @@ function App() {
           path="/membership/benefits"
           element={<MembershipBenefits />}
         />
+
+        {/* 🔹 Verification Route */}
+        <Route path="/verify" element={<Verify />} />
       </Route>
 
       {/* ✅ Protected Dashboard (FIXED HERE) */}

@@ -22,12 +22,44 @@ const Signup = () => {
     emailRef.current?.focus();
   }, []);
 
+  // ✅ Frontend validation
+  const validateForm = () => {
+    if (!email || !password) {
+      setMessage("Please fill all fields.");
+      return false;
+    }
+
+    // Basic email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setMessage("Please enter a valid email address.");
+      return false;
+    }
+
+    // Password length
+    if (password.length < 8) {
+      setMessage("Password must be at least 8 characters long.");
+      return false;
+    }
+
+    // Password strength (simple example: contains letters & numbers)
+    const strongPassword = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d!@#$%^&*()_+]{8,}$/;
+    if (!strongPassword.test(password)) {
+      setMessage(
+        "Password should contain letters and numbers for strength."
+      );
+      return false;
+    }
+
+    setMessage("");
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!email || !password) {
+    if (!validateForm()) {
       setIsError(true);
-      setMessage("Please fill all fields.");
       return;
     }
 
