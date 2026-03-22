@@ -1,73 +1,72 @@
 // src/services/email.js
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 
-const isProduction = process.env.NODE_ENV === "production";
-
-if (isProduction) {
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    throw new Error("EMAIL_USER or EMAIL_PASS not set in .env");
-  }
+if (!process.env.RESEND_API_KEY) {
+  throw new Error("❌ RESEND_API_KEY not set");
 }
 
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || "smtp.gmail.com",
-  port: Number(process.env.EMAIL_PORT) || 587,
-  secure: Number(process.env.EMAIL_PORT) === 465, // true for 465, false for 587
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS, // Gmail App Password
-  },
-});
+// Determine frontend URL dynamically
+const FRONTEND_VERIFY_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://www.aimsn.com.ng/verify"
+    : "http://localhost:5173/verify";
 
-const FROM_EMAIL =
-  process.env.EMAIL_FROM || `"AIMS Nigeria" <${process.env.EMAIL_USER}>`;
+// Initialize Resend client
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+// Corrected FROM_EMAIL — must follow proper format
+const FROM_EMAIL = process.env.EMAIL_FROM || "AIMS Nigeria <noreply@aimsn.com.ng>";
 
 /**
- * Send email verification
+ * Fire-and-forget wrapper (NON-BLOCKING)
  */
-const sendVerificationEmail = async (to, token) => {
-  const link = `http://localhost:3000/api/members/verify?token=${token}`;
+const safeSend = async (fn) => {
+  fn().catch((err) => {
+    console.error("❌ Email error:", err?.message || err);
+  });
+};
 
-  try {
-    await transporter.sendMail({
-      from: FROM_EMAIL,
+/**
+ * Send verification email (NON-BLOCKING)
+ */
+const sendVerificationEmail = (to, token) => {
+  const link = `${FRONTEND_VERIFY_URL}?token=${token}`; // 🚀 updated
+
+  safeSend(async () => {
+    const res = await resend.emails.send({
+      from: FROM_EMAIL, // no extra quotes
       to,
       subject: "Verify Your Email",
       html: `
         <h2>Welcome to AIMS Nigeria 👋</h2>
-        <p>Please verify your email by clicking the link below:</p>
-        <a href="${link}">Verify Email</a>
-        <p>After verification, you’ll be able to access all professional resources.</p>
+        <p>Thank you for signing up! Please verify your email by clicking the link below:</p>
+        <a href="${link}" style="display:inline-block;padding:10px 20px;background:#4f46e5;color:#fff;text-decoration:none;border-radius:5px;">Verify Email</a>
+        <p>If you did not sign up, you can ignore this email.</p>
       `,
     });
 
-    console.log(`✅ Verification email sent to ${to}`);
-  } catch (err) {
-    console.error("❌ Failed to send verification email:", err);
-  }
+    console.log(`✅ Verification email sent to ${to}`, res?.id);
+  });
 };
 
 /**
- * Send welcome email after successful verification
+ * Send welcome email (NON-BLOCKING)
  */
-const sendWelcomeEmail = async (to) => {
-  try {
-    await transporter.sendMail({
-      from: FROM_EMAIL,
+const sendWelcomeEmail = (to) => {
+  safeSend(async () => {
+    const res = await resend.emails.send({
+      from: FROM_EMAIL, // no extra quotes
       to,
       subject: "Welcome to AIMS Nigeria 🎉",
       html: `
         <h2>Welcome to AIMS Nigeria 👋</h2>
-        <p>Congratulations! Your account has been successfully verified.</p>
-        <p>You can now access all training programs, certifications, and professional resources.</p>
-        <p>Enjoy your journey with AIMS!</p>
+        <p>Your account has been successfully verified.</p>
+        <p>You now have full access to your dashboard.</p>
       `,
     });
 
-    console.log(`✅ Welcome email sent to ${to}`);
-  } catch (err) {
-    console.error("❌ Failed to send welcome email:", err);
-  }
+    console.log(`✅ Welcome email sent to ${to}`, res?.id);
+  });
 };
 
 module.exports = {
