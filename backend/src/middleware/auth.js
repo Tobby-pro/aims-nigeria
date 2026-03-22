@@ -1,12 +1,7 @@
-// middleware/auth/auth.ts
-import { Request, Response, NextFunction } from "express";
-import { verifyJwt } from "../services/jwt";
+// middleware/auth/auth.js
+const { verifyJwt } = require("../services/jwt");
 
-export const requireAuth = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const requireAuth = (req, res, next) => {
   try {
     const token = req.cookies.token;
 
@@ -19,13 +14,16 @@ export const requireAuth = (
 
     const decoded = verifyJwt(token);
 
-    (req as any).user = decoded;
+    req.user = decoded; // attach decoded user to request
 
     next();
-  } catch {
+  } catch (err) {
+    console.error("Authentication error:", err);
     return res.status(401).json({
       success: false,
       message: "Invalid or expired token",
     });
   }
 };
+
+module.exports = { requireAuth };

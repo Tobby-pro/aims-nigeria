@@ -1,15 +1,15 @@
-// src/index.ts
-import express from "express";
-import * as dotenv from "dotenv";
-import cors from "cors";
-import cookieParser from "cookie-parser";
+// src/index.js
+const express = require("express");
+const dotenv = require("dotenv");
+const cors = require("cors");
+const cookieParser = require("cookie-parser");
 
 // ---------------------------
 // ✅ Routes
 // ---------------------------
-import membersRouter from "./routes/members";
-import paymentsRouter from "./routes/payments";
-import coursesRouter from "./routes/courses"; // NEW: for enrolled courses
+const membersRouter = require("./routes/members");
+const paymentsRouter = require("./routes/payments");
+const coursesRouter = require("./routes/courses"); // NEW: for enrolled courses
 
 dotenv.config();
 
@@ -44,8 +44,8 @@ app.use((req, res, next) => {
 // ✅ Routes
 // ---------------------------
 app.use("/api/members", membersRouter);
-app.use("/api/payments", paymentsRouter); // NEW
-app.use("/api/courses", coursesRouter);   // NEW
+app.use("/api/payments", paymentsRouter);
+app.use("/api/courses", coursesRouter); // NEW
 
 // ---------------------------
 // ✅ Test Route for POST Debugging

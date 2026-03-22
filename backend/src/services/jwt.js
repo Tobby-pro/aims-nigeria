@@ -1,6 +1,5 @@
-// src/services/jwt.ts
-
-import jwt from "jsonwebtoken";
+// src/services/jwt.js
+const jwt = require("jsonwebtoken");
 
 // ✅ Ensure JWT_SECRET exists
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -15,7 +14,7 @@ if (!JWT_SECRET) {
  * @param payload - The data to include in the token (e.g., user id and email)
  * @returns A signed JWT string
  */
-export const signJwt = (payload: object): string => {
+const signJwt = (payload) => {
   return jwt.sign(payload, JWT_SECRET, {
     expiresIn: "7d", // token expires in 7 days
   });
@@ -26,6 +25,11 @@ export const signJwt = (payload: object): string => {
  * @param token - JWT string to verify
  * @returns The decoded payload if valid
  */
-export const verifyJwt = (token: string): object | string => {
+const verifyJwt = (token) => {
   return jwt.verify(token, JWT_SECRET);
+};
+
+module.exports = {
+  signJwt,
+  verifyJwt,
 };

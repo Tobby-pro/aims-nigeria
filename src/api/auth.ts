@@ -2,11 +2,11 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://localhost:3000/api",
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000/api",
   withCredentials: true,
 });
 
-export default API; // ✅ THIS MAKES IT REUSABLE
+export default API;
 
 export const registerMember = (email: string, password: string) => {
   return API.post("/members/register", { email, password });

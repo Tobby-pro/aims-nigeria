@@ -1,17 +1,18 @@
-// src/routes/members.ts
-import { Router } from "express";
-import { db } from "../db/client";
-import { members, enrolled_fees } from "../db/schema";
-import { signJwt } from "../services/jwt";
-import { sendVerificationEmail, sendWelcomeEmail } from "../services/email";
-import { generateToken } from "../utils/token";
-import { requireAuth } from "../middleware/auth";
-import { requireVerified } from "../middleware/verified";
-import { eq } from "drizzle-orm";
-import bcrypt from "bcrypt";
+// src/routes/members.js
+const { Router } = require("express");
+const { db } = require("../db/client");
+const { members, enrolled_fees } = require("../db/schema");
+const { signJwt } = require("../services/jwt");
+const { sendVerificationEmail, sendWelcomeEmail } = require("../services/email");
+const { generateToken } = require("../utils/token");
+const { requireAuth } = require("../middleware/auth");
+const { requireVerified } = require("../middleware/verified");
+const { eq } = require("drizzle-orm");
+const bcrypt = require("bcrypt");
 
 const router = Router();
 
+// Global logging for this router
 router.use((req, res, next) => {
   console.log(`[MEMBERS ROUTER] ${req.method} ${req.url}`);
   next();
@@ -54,7 +55,7 @@ router.post("/register", async (req, res) => {
       is_verified: false,
     });
 
-    // ✅ Send verification email
+    // Send verification email
     await sendVerificationEmail(email, verification_token);
 
     res.status(201).json({
@@ -76,7 +77,7 @@ router.post("/register", async (req, res) => {
  */
 router.get("/verify", async (req, res) => {
   try {
-    const token = req.query.token as string;
+    const token = req.query.token;
 
     if (!token) {
       return res.status(400).json({
@@ -97,7 +98,7 @@ router.get("/verify", async (req, res) => {
       });
     }
 
-    // ✅ Mark as verified
+    // Mark as verified
     await db
       .update(members)
       .set({
@@ -106,16 +107,16 @@ router.get("/verify", async (req, res) => {
       })
       .where(eq(members.id, member.id));
 
-    // ✅ Send welcome email
+    // Send welcome email
     await sendWelcomeEmail(member.email);
 
-    // ✅ Generate JWT
+    // Generate JWT
     const jwt = signJwt({
       id: member.id,
       email: member.email,
     });
 
-    // ✅ Set auth cookie
+    // Set auth cookie
     res.cookie("token", jwt, {
       httpOnly: true,
       sameSite: "lax",
@@ -123,11 +124,8 @@ router.get("/verify", async (req, res) => {
       maxAge: 1000 * 60 * 60 * 24 * 7,
     });
 
-    // ✅ REDIRECT TO FRONTEND (BEST UX)
-    return res.redirect(
-      "http://localhost:5173/dashboard?verified=true"
-    );
-
+    // Redirect to frontend
+    return res.redirect("http://localhost:5173/dashboard?verified=true");
   } catch (error) {
     console.error("Verification error:", error);
     res.status(500).json({
@@ -204,7 +202,7 @@ router.post("/login", async (req, res) => {
  */
 router.get("/me", requireAuth, requireVerified, async (req, res) => {
   try {
-    const user = (req as any).user;
+    const user = req.user;
 
     const [member] = await db
       .select({
@@ -250,4 +248,4 @@ router.post("/logout", (req, res) => {
   });
 });
 
-export default router;
+module.exports = router;
