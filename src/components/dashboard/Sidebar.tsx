@@ -7,7 +7,6 @@ import {
   GraduationCap,
   Award,
   LogOut,
-
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
@@ -39,19 +38,20 @@ const Sidebar = () => {
   return (
     <>
       {/* --- MOBILE TOP NAVIGATION --- */}
-      <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-violet-900 border-b border-white/10 flex items-center justify-between px-6 z-50 shadow-md">
+      <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-violet-950 border-b border-white/10 flex items-center justify-between px-6 z-50 shadow-lg">
         <span className="font-bold text-white tracking-tight">AIMS Nigeria</span>
         <button 
           onClick={handleLogout}
-          className="p-2 text-white/80 hover:text-red-400 transition-colors"
+          className="p-2 text-white/80 hover:text-red-400 transition-colors flex items-center gap-2"
         >
-          <LogOut size={20} />
+          <span className="text-xs font-medium">Exit</span>
+          <LogOut size={18} />
         </button>
       </div>
 
       {/* --- MOBILE BOTTOM TAB BAR --- */}
-      {/* This prevents the sidebar from "blocking" content by putting navigation at the thumb-zone */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-gray-200 flex items-center justify-around z-50 px-2 pb-safe">
+      {/* Floating style for a more modern look */}
+      <nav className="md:hidden fixed bottom-4 left-4 right-4 h-16 bg-white/95 backdrop-blur-md border border-gray-200 rounded-2xl flex items-center justify-around z-50 px-2 shadow-2xl">
         {menu.map((item, i) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
@@ -59,12 +59,12 @@ const Sidebar = () => {
             <NavLink
               key={i}
               to={item.path}
-              className={`flex flex-col items-center justify-center flex-1 py-1 transition-colors ${
-                isActive ? "text-indigo-600" : "text-gray-400"
+              className={`flex flex-col items-center justify-center flex-1 py-1 transition-all duration-300 ${
+                isActive ? "text-indigo-600 scale-110" : "text-gray-400 hover:text-gray-600"
               }`}
             >
-              <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
-              <span className="text-[10px] font-medium mt-1">{item.label}</span>
+              <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
+              <span className="text-[10px] font-bold mt-1 uppercase tracking-wider">{item.label}</span>
             </NavLink>
           );
         })}
@@ -83,8 +83,8 @@ const Sidebar = () => {
       >
         {/* Logo Section */}
         <div className="flex items-center h-20 px-6 border-b border-white/10 overflow-hidden">
-          <div className="min-w-[32px] h-8 bg-white/20 rounded-lg flex items-center justify-center mr-4">
-             <GraduationCap size={20} />
+          <div className="min-w-[32px] h-8 bg-white/20 rounded-lg flex items-center justify-center mr-4 shadow-inner">
+             <GraduationCap size={20} className="text-white" />
           </div>
           <span className={`font-bold whitespace-nowrap transition-opacity duration-300 ${expanded ? "opacity-100" : "opacity-0"}`}>
             AIMS Nigeria
@@ -95,13 +95,14 @@ const Sidebar = () => {
         <div className="flex-1 py-6 px-3 space-y-2">
           {menu.map((item, i) => {
             const Icon = item.icon;
+            const isActive = location.pathname === item.path;
             return (
               <NavLink
                 key={i}
                 to={item.path}
                 className={({ isActive }) =>
                   `flex items-center h-12 rounded-xl transition-all duration-200 group relative
-                  ${isActive ? "bg-white text-indigo-900 shadow-lg" : "hover:bg-white/10 text-white/70 hover:text-white"}`
+                  ${isActive ? "bg-white text-indigo-900 shadow-xl" : "hover:bg-white/10 text-white/70 hover:text-white"}`
                 }
               >
                 <div className="min-w-[56px] flex justify-center">
@@ -114,9 +115,14 @@ const Sidebar = () => {
                   {item.label}
                 </span>
 
+                {/* Active Indicator Bar */}
+                {isActive && !expanded && (
+                  <div className="absolute left-0 w-1 h-6 bg-white rounded-r-full" />
+                )}
+
                 {/* Tooltip for collapsed state */}
                 {!expanded && (
-                  <div className="absolute left-full ml-6 px-3 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-xl">
+                  <div className="absolute left-full ml-4 px-3 py-2 bg-gray-900 text-white text-xs font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-2xl z-50">
                     {item.label}
                   </div>
                 )}
@@ -144,9 +150,9 @@ const Sidebar = () => {
       </aside>
 
       {/* --- CONTENT SPACER --- */}
-      {/* This invisible div ensures the main content isn't hidden under the mobile bars */}
+      {/* Mobile-only spacers to ensure content isn't covered by our fixed bars */}
       <div className="md:hidden h-16" /> {/* Top space */}
-      <div className="md:hidden h-16" /> {/* Bottom space */}
+      <div className="md:hidden h-24" /> {/* Extra bottom space for the floating nav */}
     </>
   );
 };
