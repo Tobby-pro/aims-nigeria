@@ -1,6 +1,5 @@
-// src/components/dashboard/Sidebar.tsx
 import { useState, useEffect } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   User,
@@ -8,23 +7,22 @@ import {
   GraduationCap,
   Award,
   LogOut,
-  Menu,
-  X,
+
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
 const menu = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
   { icon: User, label: "Profile", path: "/dashboard/profile" },
-  { icon: BookOpen, label: "Training Programs", path: "/dashboard/training" },
-  { icon: GraduationCap, label: "My Courses", path: "/dashboard/courses" },
+  { icon: BookOpen, label: "Training", path: "/dashboard/training" },
+  { icon: GraduationCap, label: "Courses", path: "/dashboard/courses" },
   { icon: Award, label: "Certificates", path: "/dashboard/certificates" },
 ];
 
 const Sidebar = () => {
   const [expanded, setExpanded] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { logout } = useAuth();
 
   const handleLogout = async () => {
@@ -32,51 +30,69 @@ const Sidebar = () => {
     navigate("/login");
   };
 
-  // Sync sidebar width for desktop
+  // Sync sidebar width for desktop layout calculations
   useEffect(() => {
-    const width = expanded ? "14rem" : "4rem";
+    const width = expanded ? "14rem" : "5rem";
     document.documentElement.style.setProperty("--sidebar-width", width);
   }, [expanded]);
 
   return (
     <>
-      {/* Mobile Overlay */}
-      <div
-        className={`fixed inset-0 z-30 bg-black/40 backdrop-blur-sm transition-opacity md:hidden ${
-          mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
-        onClick={() => setMobileOpen(false)}
-      />
+      {/* --- MOBILE TOP NAVIGATION --- */}
+      <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-violet-900 border-b border-white/10 flex items-center justify-between px-6 z-50 shadow-md">
+        <span className="font-bold text-white tracking-tight">AIMS Nigeria</span>
+        <button 
+          onClick={handleLogout}
+          className="p-2 text-white/80 hover:text-red-400 transition-colors"
+        >
+          <LogOut size={20} />
+        </button>
+      </div>
 
-      {/* Sidebar */}
+      {/* --- MOBILE BOTTOM TAB BAR --- */}
+      {/* This prevents the sidebar from "blocking" content by putting navigation at the thumb-zone */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-gray-200 flex items-center justify-around z-50 px-2 pb-safe">
+        {menu.map((item, i) => {
+          const Icon = item.icon;
+          const isActive = location.pathname === item.path;
+          return (
+            <NavLink
+              key={i}
+              to={item.path}
+              className={`flex flex-col items-center justify-center flex-1 py-1 transition-colors ${
+                isActive ? "text-indigo-600" : "text-gray-400"
+              }`}
+            >
+              <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
+              <span className="text-[10px] font-medium mt-1">{item.label}</span>
+            </NavLink>
+          );
+        })}
+      </nav>
+
+      {/* --- DESKTOP SIDEBAR --- */}
       <aside
         className={`
-          fixed top-0 left-0 z-40 h-screen flex flex-col
-          bg-gradient-to-b from-violet-900 via-indigo-800 to-violet-700
-          text-white shadow-lg
-          transition-transform duration-300 ease-in-out
-          md:relative md:translate-x-0
-          ${mobileOpen ? "translate-x-0 w-56" : "-translate-x-56 w-56 md:w-[var(--sidebar-width)]"}
+          hidden md:flex fixed top-0 left-0 z-40 h-screen flex-col
+          bg-gradient-to-b from-violet-950 via-indigo-900 to-violet-800
+          text-white shadow-2xl transition-all duration-300 ease-in-out
+          ${expanded ? "w-56" : "w-20"}
         `}
         onMouseEnter={() => setExpanded(true)}
         onMouseLeave={() => setExpanded(false)}
       >
-        {/* Logo */}
-        <div className="flex items-center justify-between p-4 md:p-3 border-b border-white/30">
-          <span className="font-bold text-sm md:text-base">
-            {expanded || mobileOpen ? "AIMS Nigeria" : "AIMS"}
+        {/* Logo Section */}
+        <div className="flex items-center h-20 px-6 border-b border-white/10 overflow-hidden">
+          <div className="min-w-[32px] h-8 bg-white/20 rounded-lg flex items-center justify-center mr-4">
+             <GraduationCap size={20} />
+          </div>
+          <span className={`font-bold whitespace-nowrap transition-opacity duration-300 ${expanded ? "opacity-100" : "opacity-0"}`}>
+            AIMS Nigeria
           </span>
-          {/* Mobile close button */}
-          <button
-            className="md:hidden p-1 rounded-full bg-white/20 hover:bg-white/30 transition"
-            onClick={() => setMobileOpen(false)}
-          >
-            <X size={20} />
-          </button>
         </div>
 
-        {/* Menu */}
-        <nav className="flex-1 mt-4 flex flex-col space-y-1">
+        {/* Desktop Menu */}
+        <div className="flex-1 py-6 px-3 space-y-2">
           {menu.map((item, i) => {
             const Icon = item.icon;
             return (
@@ -84,53 +100,53 @@ const Sidebar = () => {
                 key={i}
                 to={item.path}
                 className={({ isActive }) =>
-                  `relative flex items-center px-3 md:px-4 py-2 md:py-3 rounded-lg transition-all duration-300
-                  hover:shadow-lg hover:bg-indigo-600/30 ${
-                    isActive ? "bg-indigo-600 shadow-md" : ""
-                  }`
+                  `flex items-center h-12 rounded-xl transition-all duration-200 group relative
+                  ${isActive ? "bg-white text-indigo-900 shadow-lg" : "hover:bg-white/10 text-white/70 hover:text-white"}`
                 }
               >
-                <Icon size={20} className="flex-shrink-0 md:mr-3" />
-
-                <span
-                  className={`
-                    text-xs md:text-sm font-medium transition-all duration-300
-                    ${expanded || mobileOpen ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2 pointer-events-none"}
-                  `}
-                >
+                <div className="min-w-[56px] flex justify-center">
+                  <Icon size={22} />
+                </div>
+                
+                <span className={`text-sm font-semibold whitespace-nowrap transition-all duration-300 ${
+                  expanded ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4 pointer-events-none"
+                }`}>
                   {item.label}
                 </span>
+
+                {/* Tooltip for collapsed state */}
+                {!expanded && (
+                  <div className="absolute left-full ml-6 px-3 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-xl">
+                    {item.label}
+                  </div>
+                )}
               </NavLink>
             );
           })}
+        </div>
 
-          {/* Logout */}
+        {/* Desktop Logout */}
+        <div className="p-3 border-t border-white/10">
           <button
             onClick={handleLogout}
-            className="relative flex items-center px-3 md:px-4 py-2 md:py-3 rounded-lg hover:shadow-lg hover:bg-red-600/30 transition-all duration-300 mt-auto"
+            className="flex items-center w-full h-12 rounded-xl text-white/70 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200 group relative"
           >
-            <LogOut size={20} className="flex-shrink-0 md:mr-3" />
-            <span
-              className={`
-                text-xs md:text-sm font-medium transition-all duration-300
-                ${expanded || mobileOpen ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2 pointer-events-none"}
-              `}
-            >
+            <div className="min-w-[56px] flex justify-center">
+              <LogOut size={22} />
+            </div>
+            <span className={`text-sm font-semibold transition-all duration-300 ${
+              expanded ? "opacity-100" : "opacity-0"
+            }`}>
               Logout
             </span>
           </button>
-        </nav>
-
-        {/* Mobile open button */}
-        {!mobileOpen && (
-          <button
-            className="fixed bottom-4 left-4 md:hidden p-2 rounded-full bg-white/20 text-white shadow-md hover:bg-white/30 transition z-50"
-            onClick={() => setMobileOpen(true)}
-          >
-            <Menu size={20} />
-          </button>
-        )}
+        </div>
       </aside>
+
+      {/* --- CONTENT SPACER --- */}
+      {/* This invisible div ensures the main content isn't hidden under the mobile bars */}
+      <div className="md:hidden h-16" /> {/* Top space */}
+      <div className="md:hidden h-16" /> {/* Bottom space */}
     </>
   );
 };
