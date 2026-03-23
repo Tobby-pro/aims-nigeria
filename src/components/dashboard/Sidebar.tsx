@@ -8,6 +8,8 @@ import {
   GraduationCap,
   Award,
   LogOut,
+  Menu,
+  X,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
@@ -30,7 +32,7 @@ const Sidebar = () => {
     navigate("/login");
   };
 
-  // Sync sidebar width globally
+  // Sync sidebar width for desktop
   useEffect(() => {
     const width = expanded ? "14rem" : "4rem";
     document.documentElement.style.setProperty("--sidebar-width", width);
@@ -40,30 +42,41 @@ const Sidebar = () => {
     <>
       {/* Mobile Overlay */}
       <div
-        className={`fixed inset-0 z-30 bg-black/40 backdrop-blur-sm md:hidden transition-opacity ${
+        className={`fixed inset-0 z-30 bg-black/40 backdrop-blur-sm transition-opacity md:hidden ${
           mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
         onClick={() => setMobileOpen(false)}
       />
 
+      {/* Sidebar */}
       <aside
         className={`
-          fixed top-0 left-0 z-40 h-screen 
-          bg-gradient-to-b from-violet-900 via-indigo-800 to-violet-700 
-          text-white flex flex-col transition-all duration-300
-          md:relative
-          ${mobileOpen ? "w-56" : "w-16 md:w-[var(--sidebar-width)]"}
+          fixed top-0 left-0 z-40 h-screen flex flex-col
+          bg-gradient-to-b from-violet-900 via-indigo-800 to-violet-700
+          text-white shadow-lg
+          transition-transform duration-300 ease-in-out
+          md:relative md:translate-x-0
+          ${mobileOpen ? "translate-x-0 w-56" : "-translate-x-56 w-56 md:w-[var(--sidebar-width)]"}
         `}
         onMouseEnter={() => setExpanded(true)}
         onMouseLeave={() => setExpanded(false)}
       >
         {/* Logo */}
-        <div className="p-4 md:p-3 font-bold text-sm border-b border-white/30">
-          {expanded || mobileOpen ? "AIMS Nigeria" : "AIMS"}
+        <div className="flex items-center justify-between p-4 md:p-3 border-b border-white/30">
+          <span className="font-bold text-sm md:text-base">
+            {expanded || mobileOpen ? "AIMS Nigeria" : "AIMS"}
+          </span>
+          {/* Mobile close button */}
+          <button
+            className="md:hidden p-1 rounded-full bg-white/20 hover:bg-white/30 transition"
+            onClick={() => setMobileOpen(false)}
+          >
+            <X size={20} />
+          </button>
         </div>
 
         {/* Menu */}
-        <nav className="flex-1 mt-4 space-y-1">
+        <nav className="flex-1 mt-4 flex flex-col space-y-1">
           {menu.map((item, i) => {
             const Icon = item.icon;
             return (
@@ -77,7 +90,7 @@ const Sidebar = () => {
                   }`
                 }
               >
-                <Icon size={18} className="flex-shrink-0 md:mr-3" />
+                <Icon size={20} className="flex-shrink-0 md:mr-3" />
 
                 <span
                   className={`
@@ -91,13 +104,12 @@ const Sidebar = () => {
             );
           })}
 
-          {/* LOGOUT */}
+          {/* Logout */}
           <button
             onClick={handleLogout}
-            className="relative w-full flex items-center px-3 md:px-4 py-2 md:py-3 rounded-lg hover:shadow-lg hover:bg-red-600/30 transition-all duration-300"
+            className="relative flex items-center px-3 md:px-4 py-2 md:py-3 rounded-lg hover:shadow-lg hover:bg-red-600/30 transition-all duration-300 mt-auto"
           >
-            <LogOut size={18} className="flex-shrink-0 md:mr-3" />
-
+            <LogOut size={20} className="flex-shrink-0 md:mr-3" />
             <span
               className={`
                 text-xs md:text-sm font-medium transition-all duration-300
@@ -109,13 +121,15 @@ const Sidebar = () => {
           </button>
         </nav>
 
-        {/* Mobile Toggle */}
-        <button
-          className="absolute bottom-4 right-4 md:hidden p-2 rounded-full bg-white/20 text-white shadow-md hover:bg-white/30 transition"
-          onClick={() => setMobileOpen(!mobileOpen)}
-        >
-          {mobileOpen ? "✕" : "☰"}
-        </button>
+        {/* Mobile open button */}
+        {!mobileOpen && (
+          <button
+            className="fixed bottom-4 left-4 md:hidden p-2 rounded-full bg-white/20 text-white shadow-md hover:bg-white/30 transition z-50"
+            onClick={() => setMobileOpen(true)}
+          >
+            <Menu size={20} />
+          </button>
+        )}
       </aside>
     </>
   );
