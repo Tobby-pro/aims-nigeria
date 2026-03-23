@@ -22,7 +22,14 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         <Sidebar />
 
         {/* Main Content */}
-        <main className="flex-1 bg-transparent min-h-screen p-8">
+        <main
+          className={`
+            flex-1 bg-transparent min-h-screen
+            p-4 sm:p-6
+            md:pl-[var(--sidebar-width)] md:pt-0
+            pt-20 md:pt-0
+          `}
+        >
           {children}
         </main>
       </div>
