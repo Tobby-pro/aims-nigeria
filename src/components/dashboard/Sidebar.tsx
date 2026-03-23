@@ -47,7 +47,7 @@ const Sidebar = () => {
           onClick={handleLogout}
           className="p-2 text-white/70 hover:text-red-400 transition-colors flex items-center gap-1"
         >
-          <span className="text-[11px] font-medium">Exit</span>
+          <span className="text-[11px] font-medium lowercase">exit</span>
           <LogOut size={16} />
         </button>
       </div>
@@ -70,7 +70,7 @@ const Sidebar = () => {
             >
               <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />
 
-              <span className="text-[9px] font-semibold mt-1 uppercase tracking-wide">
+              <span className="text-[9px] font-medium mt-1 tracking-normal">
                 {item.label}
               </span>
             </NavLink>
