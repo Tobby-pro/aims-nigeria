@@ -1,17 +1,16 @@
-// components/dashboard/DashboardHome.tsx
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { BookOpen } from "lucide-react";
+import { BookOpen, ShieldCheck, Zap, Star, AlertCircle, Loader2 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { initiatePayment, verifyPayment } from "../../api/payments";
 import { payWithPaystack } from "../../utils/paystack";
-import { useState, useEffect } from "react";
-import API from "../../api/auth"; // reuse same axios instance
+import API from "../../api/auth";
 
 type UserStatus = {
   id: number;
   email: string;
-  is_member: boolean; // ✅ membership flag
+  is_member: boolean;
 };
 
 const DashboardHome = () => {
@@ -21,7 +20,6 @@ const DashboardHome = () => {
   const [error, setError] = useState<string | null>(null);
   const [userStatus, setUserStatus] = useState<UserStatus | null>(null);
 
-  // ✅ Fetch current user info on load
   useEffect(() => {
     const fetchUserStatus = async () => {
       try {
@@ -40,16 +38,12 @@ const DashboardHome = () => {
       navigate("/login");
       return;
     }
-
     try {
       setLoading(true);
       setError(null);
-
-      // STEP 1: Get payment details from backend
       const { data } = await initiatePayment("membership_registration");
       const { reference, email, amount, publicKey } = data;
 
-      // STEP 2: Use reusable Paystack utility
       payWithPaystack({
         email,
         amount,
@@ -59,105 +53,165 @@ const DashboardHome = () => {
         onSuccess: async (ref: string) => {
           try {
             await verifyPayment(ref);
-
-            alert("Payment verified 🎉");
-
-            // ✅ Refresh user status after successful payment
             const { data: updatedUser } = await API.get("/members/me");
             setUserStatus(updatedUser);
           } catch (err: any) {
-            console.error("Payment verification failed:", err);
-            setError(
-              err?.response?.data?.message || "Payment verification failed ❌"
-            );
+            setError("Payment verification failed ❌");
           } finally {
             setLoading(false);
           }
         },
-        onClose: () => {
-          console.log("Payment cancelled by user");
-          setLoading(false);
-        },
+        onClose: () => setLoading(false),
       });
     } catch (err: any) {
-      console.error("Payment initialization error:", err);
-      setError(
-        err?.response?.data?.message || "Payment initialization failed ❌"
-      );
+      setError("Payment initialization failed ❌");
       setLoading(false);
     }
   };
 
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">
-        Welcome to AIMS Nigeria
-      </h1>
+  // ✅ Extract name from email
+  const displayName = user?.email
+    ? user.email.split("@")[0].charAt(0).toUpperCase() +
+      user.email.split("@")[0].slice(1)
+    : "User";
 
-      {/* Error UI */}
+  // Animation Variants
+  const containerVars = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  };
+
+  const itemVars = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1 }
+  };
+
+  return (
+    <motion.div 
+      initial="hidden"
+      animate="visible"
+      variants={containerVars}
+      className="p-4 md:p-8 max-w-7xl mx-auto space-y-8"
+    >
+      {/* --- GREETING SECTION --- */}
+      <motion.div variants={itemVars} className="space-y-1">
+        <h1 className="text-xl md:text-3xl font-extrabold text-gray-900 tracking-tight">
+          Welcome back, <span className="text-indigo-600">{displayName}</span> 👋
+        </h1>
+        <p className="text-xs md:text-sm text-gray-500 font-medium uppercase tracking-widest">
+          AIMS Nigeria Member Dashboard
+        </p>
+      </motion.div>
+
+      {/* --- ERROR ALERT --- */}
       {error && (
-        <div className="mb-4 p-3 bg-red-100 text-red-800 rounded">{error}</div>
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 text-red-700 rounded-2xl shadow-sm"
+        >
+          <AlertCircle size={20} />
+          <p className="text-sm font-semibold">{error}</p>
+        </motion.div>
       )}
 
-      <div className="grid md:grid-cols-3 gap-6 mb-10">
-        <div className="bg-white p-6 rounded-xl shadow">
-          <h3 className="text-sm text-gray-500">Membership Status</h3>
-          <p className="text-lg font-semibold mt-2">
-            {userStatus
-              ? userStatus.is_member
-                ? "Active"
-                : "Inactive"
-              : "Loading..."}
-          </p>
-        </div>
-
-        <div className="bg-white p-6 rounded-xl shadow">
-          <h3 className="text-sm text-gray-500">Training Programs</h3>
-          <p className="text-lg font-semibold mt-2">7 Available</p>
-        </div>
-
-        <div className="bg-white p-6 rounded-xl shadow">
-          <h3 className="text-sm text-gray-500">Certifications</h3>
-          <p className="text-lg font-semibold mt-2">--</p>
-        </div>
+      {/* --- STATS GRID --- */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+        {[
+          { 
+            label: "Membership", 
+            value: userStatus?.is_member ? "Active" : "Inactive", 
+            icon: ShieldCheck,
+            color: userStatus?.is_member ? "text-emerald-600" : "text-amber-500",
+            bg: userStatus?.is_member ? "bg-emerald-50" : "bg-amber-50"
+          },
+          { label: "Training Programs", value: "7 Programs", icon: Zap, color: "text-indigo-600", bg: "bg-indigo-50" },
+          { label: "Certifications", value: "0 Earned", icon: Star, color: "text-violet-600", bg: "bg-violet-50" }
+        ].map((stat, i) => (
+          <motion.div
+            key={i}
+            variants={itemVars}
+            whileHover={{ y: -5 }}
+            className="bg-white p-5 md:p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-5 transition-all"
+          >
+            <div className={`${stat.bg} ${stat.color} p-3 rounded-xl`}>
+              <stat.icon size={24} />
+            </div>
+            <div>
+              <p className="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-tighter">{stat.label}</p>
+              <p className={`text-base md:text-xl font-bold mt-0.5 ${stat.color}`}>{stat.value}</p>
+            </div>
+          </motion.div>
+        ))}
       </div>
 
+      {/* --- CTA SECTION --- */}
       <motion.div
-        initial={{ opacity: 0, y: 25 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="bg-white rounded-xl shadow p-8 flex flex-col md:flex-row items-center justify-between gap-6"
+        variants={itemVars}
+        className="relative overflow-hidden bg-gradient-to-br from-indigo-700 via-indigo-800 to-violet-900 rounded-3xl p-6 md:p-10 shadow-2xl shadow-indigo-200"
       >
-        <div className="flex items-start gap-4">
-          <div className="bg-indigo-100 p-3 rounded-lg text-indigo-600">
-            <BookOpen size={26} />
-          </div>
-          <div>
-            <h3 className="text-lg font-bold text-gray-800">
-              Membership Activation
-            </h3>
-            <p className="text-sm text-gray-500 mt-2">
-              Membership activation fee enables you to access all professional
-              resources.
-            </p>
-          </div>
-        </div>
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-indigo-500/20 rounded-full -ml-10 -mb-10 blur-2xl pointer-events-none" />
 
-        <motion.button
-          onClick={handleRegister}
-          disabled={loading || (userStatus?.is_member ?? false)}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.97 }}
-          className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium shadow hover:bg-indigo-500 transition disabled:opacity-50"
-        >
-          {userStatus?.is_member
-            ? "Paid"
-            : loading
-            ? "Processing..."
-            : "Pay Membership Fee"}
-        </motion.button>
+        <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8">
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-6 text-center md:text-left">
+            <div className="bg-white/20 backdrop-blur-md p-4 rounded-2xl border border-white/30 shadow-xl">
+              <BookOpen size={32} className="text-white" />
+            </div>
+            <div className="max-w-md">
+              <h3 className="text-xl md:text-2xl font-bold text-white">
+                Professional Membership
+              </h3>
+              <p className="text-indigo-100/80 text-sm md:text-base mt-2 leading-relaxed">
+                Activate your account to unlock professional certifications, global networking resources, and advanced curriculum access.
+              </p>
+            </div>
+          </div>
+
+          <motion.button
+            onClick={handleRegister}
+            disabled={loading || (userStatus?.is_member ?? false)}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className={`
+              w-full lg:w-auto px-8 py-4 rounded-2xl font-bold text-sm md:text-base transition-all flex items-center justify-center gap-3
+              ${userStatus?.is_member 
+                ? "bg-emerald-500 text-white cursor-default" 
+                : "bg-white text-indigo-900 hover:bg-indigo-50"}
+              disabled:opacity-70
+            `}
+          >
+            {loading ? (
+              <Loader2 className="animate-spin" size={20} />
+            ) : userStatus?.is_member ? (
+              <>
+                <ShieldCheck size={20} />
+                Account Verified
+              </>
+            ) : (
+              "Pay Membership Fee"
+            )}
+          </motion.button>
+        </div>
       </motion.div>
-    </div>
+
+      {/* --- PLACEHOLDER --- */}
+      <motion.div variants={itemVars} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-gray-50 border border-dashed border-gray-300 rounded-3xl p-8 flex items-center justify-center text-center">
+          <p className="text-gray-400 text-sm font-medium italic">
+            Your recent training activity will appear here.
+          </p>
+        </div>
+        <div className="bg-gray-50 border border-dashed border-gray-300 rounded-3xl p-8 flex items-center justify-center text-center">
+          <p className="text-gray-400 text-sm font-medium italic">
+            Latest AIMS publications coming soon.
+          </p>
+        </div>
+      </motion.div>
+    </motion.div>
   );
 };
 
