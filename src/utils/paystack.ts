@@ -3,9 +3,9 @@
 type PaystackProps = {
   email: string;
   amount: number;
-  reference: string; // ✅ REQUIRED (comes from backend)
-  programId?: string; // optional (kept for metadata only)
-  publicKey: string; // ✅ from backend (single source of truth)
+  reference: string; // ✅ must come from backend
+  programId?: string;
+  publicKey: string; // ✅ ONLY from backend
   onSuccess: (reference: string) => void;
   onClose?: () => void;
 };
@@ -19,19 +19,23 @@ export const payWithPaystack = ({
   onSuccess,
   onClose,
 }: PaystackProps) => {
-  // ✅ Debug (remove in production)
+  // 🔥 Safety check (prevents silent failure)
+  if (!publicKey) {
+    console.error("❌ Missing Paystack public key");
+    return;
+  }
+
   console.log("PAYSTACK KEY (from backend):", publicKey);
 
   const handler = (window as any).PaystackPop.setup({
-    key: publicKey, // ✅ NOW FROM BACKEND (FIXED)
+    key: publicKey, // ✅ LIVE key from backend
 
     email,
-    amount: amount * 100, // kobo
+    amount: amount * 100, // ✅ convert to kobo
     currency: "NGN",
 
-    ref: reference, // ✅🔥 CRITICAL FIX (must match backend)
+    ref: reference, // ✅ MUST match backend exactly
 
-    // ✅ Metadata is now OPTIONAL (not trusted anymore)
     metadata: programId
       ? {
           custom_fields: [
@@ -45,14 +49,18 @@ export const payWithPaystack = ({
       : undefined,
 
     callback: function (response: any) {
-      console.log("Payment success:", response);
+      console.log("✅ Payment success:", response);
 
-      // ✅ Always return backend reference
-      onSuccess(response.reference);
+      // 🔥 Always pass backend reference forward
+      if (response?.reference) {
+        onSuccess(response.reference);
+      } else {
+        console.error("❌ No reference returned from Paystack");
+      }
     },
 
     onClose: function () {
-      console.log("Payment closed");
+      console.log("⚠️ Payment window closed");
 
       if (onClose) onClose();
     },
