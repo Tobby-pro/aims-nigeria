@@ -23,6 +23,7 @@ const menu = [
 
 const Sidebar = () => {
   const [expanded, setExpanded] = useState(false);
+  const [forceExpanded, setForceExpanded] = useState(false); // toggled by click
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
   const { logout } = useAuth();
@@ -34,9 +35,14 @@ const Sidebar = () => {
 
   // Sync sidebar width for desktop
   useEffect(() => {
-    const width = expanded ? "14rem" : "4rem";
+    const width = expanded || forceExpanded ? "14rem" : "4rem";
     document.documentElement.style.setProperty("--sidebar-width", width);
-  }, [expanded]);
+  }, [expanded, forceExpanded]);
+
+  // Toggle expansion on click (desktop)
+  const handleClickSidebar = () => {
+    setForceExpanded(!forceExpanded);
+  };
 
   return (
     <>
@@ -55,21 +61,25 @@ const Sidebar = () => {
           bg-gradient-to-b from-violet-900 via-indigo-800 to-violet-700
           text-white shadow-lg
           transition-transform duration-300 ease-in-out
-          md:relative md:translate-x-0
+          md:relative
           ${mobileOpen ? "translate-x-0 w-56" : "-translate-x-56 w-56 md:w-[var(--sidebar-width)]"}
         `}
         onMouseEnter={() => setExpanded(true)}
         onMouseLeave={() => setExpanded(false)}
+        onClick={handleClickSidebar} // click anywhere toggles desktop expansion
       >
         {/* Logo */}
         <div className="flex items-center justify-between p-4 md:p-3 border-b border-white/30">
           <span className="font-bold text-sm md:text-base">
-            {expanded || mobileOpen ? "AIMS Nigeria" : "AIMS"}
+            {expanded || forceExpanded || mobileOpen ? "AIMS Nigeria" : "AIMS"}
           </span>
           {/* Mobile close button */}
           <button
             className="md:hidden p-1 rounded-full bg-white/20 hover:bg-white/30 transition"
-            onClick={() => setMobileOpen(false)}
+            onClick={(e) => {
+              e.stopPropagation(); // prevent triggering desktop toggle
+              setMobileOpen(false);
+            }}
           >
             <X size={20} />
           </button>
@@ -95,7 +105,7 @@ const Sidebar = () => {
                 <span
                   className={`
                     text-xs md:text-sm font-medium transition-all duration-300
-                    ${expanded || mobileOpen ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2 pointer-events-none"}
+                    ${expanded || forceExpanded || mobileOpen ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2 pointer-events-none"}
                   `}
                 >
                   {item.label}
@@ -113,7 +123,7 @@ const Sidebar = () => {
             <span
               className={`
                 text-xs md:text-sm font-medium transition-all duration-300
-                ${expanded || mobileOpen ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2 pointer-events-none"}
+                ${expanded || forceExpanded || mobileOpen ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2 pointer-events-none"}
               `}
             >
               Logout
