@@ -1,8 +1,7 @@
 // src/pages/Login.tsx
-
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { useNavigate, useLocation } from "react-router-dom"; // ✅ useLocation for redirect
+import { useNavigate, useLocation } from "react-router-dom";
 import PageHeader from "../components/layout/PageHeader";
 import Container from "../components/Container";
 import BackButton from "../components/layout/BackButton";
@@ -12,7 +11,7 @@ import { useAuth } from "../context/AuthContext";
 
 const Login = () => {
   const navigate = useNavigate();
-  const location = useLocation(); // ✅ capture previous route
+  const location = useLocation();
   const formRef = useRef<HTMLDivElement | null>(null);
   const emailRef = useRef<HTMLInputElement | null>(null);
 
@@ -20,6 +19,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [isError, setIsError] = useState(false);
 
   const { refreshUser } = useAuth();
 
@@ -33,44 +33,43 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // ---------------- VALIDATIONS ----------------
     if (!email || !password) {
-      setMessage("Please fill all fields.");
+      setIsError(true);
+      setMessage("Please fill in all fields.");
       return;
     }
 
     if (!validateEmail(email)) {
-      setMessage("Please enter a valid email address.");
+      setIsError(true);
+      setMessage("Please enter a valid email address (e.g., user@example.com).");
       return;
     }
 
     if (password.length < 8) {
+      setIsError(true);
       setMessage("Password must be at least 8 characters.");
       return;
     }
 
+    // ---------------- SUBMIT LOGIN ----------------
     try {
       setLoading(true);
       setMessage("");
+      setIsError(false);
 
-      // ✅ Login API
       await loginMember(email, password);
 
-      // ✅ Refresh auth context
       await refreshUser();
 
-      setMessage("✅ Login successful. Redirecting...");
+      setIsError(false);
+      setMessage("✅ Login successful! Redirecting...");
 
-      // ✅ Determine redirect path
       const from = (location.state as any)?.from?.pathname || "/dashboard";
-
-      setTimeout(() => {
-        navigate(from, { replace: true }); // SPA redirect to previous page
-      }, 1200);
-
+      setTimeout(() => navigate(from, { replace: true }), 1200);
     } catch (err: any) {
-      setMessage(
-        err?.response?.data?.message || "Login failed. Please try again."
-      );
+      setIsError(true);
+      setMessage(err?.response?.data?.message || "Login failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -105,6 +104,7 @@ const Login = () => {
 
             <form onSubmit={handleSubmit} className="space-y-5">
 
+              {/* EMAIL */}
               <div>
                 <label className="block text-sm mb-1 text-gray-700">
                   Email Address
@@ -115,10 +115,14 @@ const Login = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   autoComplete="email"
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 transition"
+                  className={`w-full rounded-md border px-3 py-2 text-sm focus:outline-none transition ${
+                    isError && !validateEmail(email) ? "border-red-500" : "border-gray-300 focus:border-indigo-500"
+                  }`}
+                  placeholder="Enter your email"
                 />
               </div>
 
+              {/* PASSWORD */}
               <div>
                 <label className="block text-sm mb-1 text-gray-700">
                   Password
@@ -128,19 +132,25 @@ const Login = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   autoComplete="current-password"
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 transition"
+                  className={`w-full rounded-md border px-3 py-2 text-sm focus:outline-none transition ${
+                    isError && password.length < 8 ? "border-red-500" : "border-gray-300 focus:border-indigo-500"
+                  }`}
+                  placeholder="Enter your password"
                 />
               </div>
 
+              {/* BUTTON */}
               <motion.button
                 whileTap={{ scale: 0.97 }}
-                whileHover={{ scale: 1.02 }}
+                whileHover={{ scale: loading ? 1 : 1.02 }}
                 disabled={loading}
-                className="w-full bg-indigo-600 text-white py-2.5 rounded-md text-sm font-medium flex items-center justify-center transition"
+                className={`w-full py-2.5 rounded-md text-sm font-medium flex items-center justify-center transition
+                  ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700 text-white"}`}
               >
                 {loading ? <LoadingSpinner /> : "Login"}
               </motion.button>
 
+              {/* MESSAGE */}
               {message && (
                 <p
                   className={`text-sm text-center mt-3 ${
