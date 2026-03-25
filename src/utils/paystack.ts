@@ -25,8 +25,6 @@ export const payWithPaystack = ({
     return;
   }
 
-  console.log("PAYSTACK KEY (from backend):", publicKey);
-
   const handler = (window as any).PaystackPop.setup({
     key: publicKey, // ✅ LIVE key from backend
 

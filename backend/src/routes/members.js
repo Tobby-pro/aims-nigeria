@@ -150,13 +150,16 @@ router.get("/verify", async (req, res) => {
  */
 router.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email } = req.body;
+
+    // 🔹 DEBUG: log every login attempt immediately
+    console.log("🔹 LOGIN ATTEMPT:", { email, timestamp: new Date().toISOString() });
 
     const [user] = await db.select().from(members).where(eq(members.email, email));
     if (!user) return res.status(401).json({ success: false, message: "Invalid credentials" });
     if (!user.is_verified) return res.status(403).json({ success: false, message: "Please verify your email first" });
 
-    const validPassword = await bcrypt.compare(password, user.password_hash);
+    const validPassword = await bcrypt.compare(req.body.password, user.password_hash);
     if (!validPassword) return res.status(401).json({ success: false, message: "Invalid credentials" });
 
     const token = signJwt({ id: user.id, email: user.email });
@@ -168,22 +171,27 @@ router.post("/login", async (req, res) => {
       maxAge: 1000 * 60 * 60 * 24 * 7,
     });
 
+    // 🔹 DEBUG: log successful login with admin flag
+    console.log("🔹 LOGIN SUCCESS:", { email: user.email, is_admin: user.is_admin, timestamp: new Date().toISOString() });
+
     res.json({ success: true, message: "Login successful" });
   } catch (error) {
     console.error("❌ Login failed:", error);
     res.status(500).json({ success: false, message: "Login failed" });
   }
 });
-
 /**
  * CURRENT USER
  */
 router.get("/me", requireAuth, requireVerified, async (req, res) => {
+  // 🔹 DEBUG: always log when /me is called, before anything else
+  console.log("🔹 /ME HIT:", { reqUser: req.user, timestamp: new Date().toISOString() });
+
   try {
     const user = req.user;
 
     const [member] = await db
-      .select({ id: members.id, email: members.email })
+      .select({ id: members.id, email: members.email, is_admin: members.is_admin })
       .from(members)
       .where(eq(members.id, user.id));
 
@@ -197,7 +205,6 @@ router.get("/me", requireAuth, requireVerified, async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to fetch user info" });
   }
 });
-
 /**
  * LOGOUT
  */
