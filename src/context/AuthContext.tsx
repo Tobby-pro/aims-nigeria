@@ -1,4 +1,3 @@
-// src/context/AuthContext.tsx
 import {
   createContext,
   useContext,
@@ -6,7 +5,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import API from "../api/auth"; // ✅ your shared axios instance
+import API from "../api/auth";
 
 // -----------------------
 // Updated User type
@@ -14,7 +13,7 @@ import API from "../api/auth"; // ✅ your shared axios instance
 export interface User {
   id: number;
   email: string;
-  is_admin: boolean; // 🔹 Added so admin protection works
+  is_admin: boolean;
 }
 
 // -----------------------
@@ -24,7 +23,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   logout: () => Promise<void>;
-  refreshUser: () => Promise<void>;
+  refreshUser: () => Promise<User | null>; // ✅ FIXED
 }
 
 // -----------------------
@@ -40,13 +39,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   // ✅ Fetch current user from backend
-  const refreshUser = async () => {
+  const refreshUser = async (): Promise<User | null> => {
     try {
       const res = await API.get("/members/me");
-      // 🔹 Make sure backend returns is_admin
       setUser(res.data.data);
+      return res.data.data; // ✅ RETURN USER
     } catch (err) {
-      setUser(null); // Not logged in or error
+      setUser(null);
+      return null; // ✅ RETURN NULL
     } finally {
       setLoading(false);
     }
@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } catch (err) {
       console.error("Logout failed:", err);
     } finally {
-      setUser(null); // Always clear user locally
+      setUser(null);
     }
   };
 

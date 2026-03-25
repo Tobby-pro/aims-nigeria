@@ -1,4 +1,3 @@
-// src/pages/AdminLogin.tsx
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -21,7 +20,7 @@ const AdminLogin = () => {
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
 
-  const { refreshUser, user } = useAuth(); // ✅ use user directly
+  const { refreshUser } = useAuth(); // ✅ ONLY this now
 
   useEffect(() => {
     formRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -59,26 +58,24 @@ const AdminLogin = () => {
       // ✅ login (sets cookie)
       await loginMember(email, password);
 
-      // ✅ refresh user from backend
-      await refreshUser();
+      // ✅ get fresh user immediately
+      const updatedUser = await refreshUser();
 
-      // ✅ wait a tiny bit for context to update
-      setTimeout(() => {
-        if (!user?.is_admin) {
-          setIsError(true);
-          setMessage("❌ Not an admin account.");
-          setLoading(false);
-          return;
-        }
+      // ❌ not admin
+      if (!updatedUser?.is_admin) {
+        setIsError(true);
+        setMessage("❌ Not an admin account.");
+        setLoading(false);
+        return;
+      }
 
-        setMessage("✅ Admin login successful! Redirecting...");
+      // ✅ success
+      setMessage("✅ Admin login successful! Redirecting...");
 
-        const from =
-          (location.state as any)?.from?.pathname || "/admin/dashboard";
+      const from =
+        (location.state as any)?.from?.pathname || "/admin/dashboard";
 
-        setTimeout(() => navigate(from, { replace: true }), 1000);
-      }, 300);
-
+      setTimeout(() => navigate(from, { replace: true }), 1000);
     } catch (err: any) {
       console.error("Admin login failed:", err);
       setIsError(true);
