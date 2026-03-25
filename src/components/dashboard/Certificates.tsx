@@ -1,3 +1,4 @@
+// src/dashboard/Certification.tsx
 import { motion } from "framer-motion";
 import { Award, Lock, Download, FileCheck, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";

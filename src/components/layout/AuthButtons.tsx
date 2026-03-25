@@ -1,3 +1,4 @@
+// src/layout/AuthButton.tsx
 import { FiLogIn, FiUserPlus } from "react-icons/fi";
 
 const AuthButtons = () => {

@@ -1,7 +1,8 @@
-// components/layout/TopBar.tsx
+// src/components/layout/TopBar.tsx
 import { FiClock, FiSmartphone, FiUser } from "react-icons/fi";
 import { motion } from "framer-motion";
 import Container from "../Container";
+import { Link } from "react-router-dom"; // 🔹 use Link instead of <a>
 
 const TopBar = () => {
   return (
@@ -27,13 +28,13 @@ const TopBar = () => {
 
           {/* Right side */}
           <div className="flex items-center gap-4">
-            <a
-              href="/admin"
+            <Link
+              to="/admin/login" // 🔹 update route to actual AdminLogin page
               className="flex items-center gap-1 hover:text-gray-900 transition text-xs sm:text-sm"
             >
               <FiUser className="w-3 h-3 sm:w-4 sm:h-4 text-indigo-600" />
               Admin Login
-            </a>
+            </Link>
           </div>
         </div>
       </Container>

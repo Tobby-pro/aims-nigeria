@@ -1,7 +1,7 @@
-// src/App.tsx
 import { Routes, Route } from "react-router-dom";
 import MainLayout from "./components/layout/MainLayout";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import ProtectedAdminRoute from "./components/auth/ProtectedAdminRoute";
 
 import Home from "./pages/Home";
 import About from "./pages/About";
@@ -16,12 +16,14 @@ import MembershipCategories from "./pages/membership/Categories";
 import MembershipBenefits from "./pages/membership/Benefits";
 
 import Dashboard from "./pages/Dashboard";
-import Verify from "./pages/Verify"; // 🔹 import the Verify page
+import Verify from "./pages/Verify";
+
+import AdminLogin from "./pages/AdminLogin";
+import AdminDashboard from "./pages/AdminDashboard";
 
 function App() {
   return (
     <Routes>
-
       {/* Public Website */}
       <Route element={<MainLayout />}>
         <Route path="/" element={<Home />} />
@@ -33,21 +35,13 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/leadership" element={<Leadership />} />
 
-        <Route
-          path="/membership/categories"
-          element={<MembershipCategories />}
-        />
+        <Route path="/membership/categories" element={<MembershipCategories />} />
+        <Route path="/membership/benefits" element={<MembershipBenefits />} />
 
-        <Route
-          path="/membership/benefits"
-          element={<MembershipBenefits />}
-        />
-
-        {/* 🔹 Verification Route */}
         <Route path="/verify" element={<Verify />} />
       </Route>
 
-      {/* ✅ Protected Dashboard (FIXED HERE) */}
+      {/* Protected Member Dashboard */}
       <Route
         path="/dashboard/*"
         element={
@@ -57,6 +51,16 @@ function App() {
         }
       />
 
+      {/* Admin Routes */}
+      <Route path="/admin/login" element={<AdminLogin />} />
+      <Route
+        path="/admin/dashboard"
+        element={
+          <ProtectedAdminRoute>
+            <AdminDashboard />
+          </ProtectedAdminRoute>
+        }
+      />
     </Routes>
   );
 }
