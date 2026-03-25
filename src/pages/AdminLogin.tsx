@@ -1,15 +1,18 @@
 // src/pages/AdminLogin.tsx
 import { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
 import Container from "../components/Container";
+import BackButton from "../components/layout/BackButton";
+import PageHeader from "../components/layout/PageHeader";
 import LoadingSpinner from "../components/ui/LoadingSpinner";
-import axios from "axios";
-import { useAuth } from "../context/AuthContext"; // 🔹 use AuthContext
+import { loginMember } from "../api/auth";
+import { useAuth } from "../context/AuthContext";
 
 const AdminLogin = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const formRef = useRef<HTMLFormElement | null>(null);
+  const formRef = useRef<HTMLDivElement | null>(null);
   const emailRef = useRef<HTMLInputElement | null>(null);
 
   const [email, setEmail] = useState("");
@@ -18,7 +21,7 @@ const AdminLogin = () => {
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
 
-  const { refreshUser } = useAuth(); // 🔹 refresh context after login
+  const { refreshUser, user } = useAuth(); // ✅ use user directly
 
   useEffect(() => {
     formRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -42,88 +45,141 @@ const AdminLogin = () => {
       return;
     }
 
-    setLoading(true);
-    setMessage("");
-    setIsError(false);
+    if (password.length < 8) {
+      setIsError(true);
+      setMessage("Password must be at least 8 characters.");
+      return;
+    }
 
     try {
-      const res = await axios.post(
-        "/api/members/login",
-        { email, password },
-        { withCredentials: true } // important for cookie auth
-      );
+      setLoading(true);
+      setMessage("");
+      setIsError(false);
 
-      // 🔹 Refresh global user state
+      // ✅ login (sets cookie)
+      await loginMember(email, password);
+
+      // ✅ refresh user from backend
       await refreshUser();
 
-      // Check if user is admin
-      if (!res.data.data.is_admin) {
-        setIsError(true);
-        setMessage("❌ Not an admin account.");
-        setLoading(false);
-        return;
-      }
+      // ✅ wait a tiny bit for context to update
+      setTimeout(() => {
+        if (!user?.is_admin) {
+          setIsError(true);
+          setMessage("❌ Not an admin account.");
+          setLoading(false);
+          return;
+        }
 
-      setIsError(false);
-      setMessage("✅ Admin login successful! Redirecting...");
+        setMessage("✅ Admin login successful! Redirecting...");
 
-      const from = (location.state as any)?.from?.pathname || "/admin/dashboard";
-      setTimeout(() => navigate(from, { replace: true }), 1000);
+        const from =
+          (location.state as any)?.from?.pathname || "/admin/dashboard";
+
+        setTimeout(() => navigate(from, { replace: true }), 1000);
+      }, 300);
+
     } catch (err: any) {
       console.error("Admin login failed:", err);
       setIsError(true);
-      setMessage(err?.response?.data?.message || "Login failed. Please try again.");
-    } finally {
+      setMessage(
+        err?.response?.data?.message || "Login failed. Please try again."
+      );
       setLoading(false);
     }
   };
 
   return (
-    <Container className="pt-8">
-      <div className="max-w-md mx-auto bg-white p-8 rounded-xl shadow-lg">
-        <h2 className="text-2xl font-bold mb-6 text-center">Admin Login</h2>
+    <>
+      <Container className="pt-4">
+        <BackButton fallbackPath="/" />
+      </Container>
 
-        <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Email</label>
-            <input
-              ref={emailRef}
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@example.com"
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:ring-indigo-200"
-            />
-          </div>
+      <PageHeader
+        title="Admin Login"
+        subtitle="Restricted access for administrators only"
+        backgroundImage="/images/buses.png"
+      />
 
-          <div>
-            <label className="block text-sm font-medium mb-1">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="********"
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:ring-indigo-200"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className={`w-full py-2.5 rounded-md font-bold text-white transition
-              ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"}`}
+      <Container>
+        <div className="py-16 flex justify-center">
+          <motion.div
+            ref={formRef}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="bg-white p-10 rounded-xl shadow-lg max-w-md w-full"
           >
-            {loading ? <LoadingSpinner /> : "Login"}
-          </button>
+            <h3 className="text-xl font-semibold text-gray-900 mb-6">
+              Admin Access
+            </h3>
 
-          {message && (
-            <p className={`text-sm mt-2 text-center ${isError ? "text-red-500" : "text-green-600"}`}>
-              {message}
-            </p>
-          )}
-        </form>
-      </div>
-    </Container>
+            <form onSubmit={handleSubmit} className="space-y-5">
+
+              <div>
+                <label className="block text-sm mb-1 text-gray-700">
+                  Email Address
+                </label>
+                <input
+                  ref={emailRef}
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className={`w-full rounded-md border px-3 py-2 text-sm ${
+                    isError && !validateEmail(email)
+                      ? "border-red-500"
+                      : "border-gray-300 focus:border-indigo-500"
+                  }`}
+                  placeholder="admin@example.com"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm mb-1 text-gray-700">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className={`w-full rounded-md border px-3 py-2 text-sm ${
+                    isError && password.length < 8
+                      ? "border-red-500"
+                      : "border-gray-300 focus:border-indigo-500"
+                  }`}
+                  placeholder="Enter your password"
+                />
+              </div>
+
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                whileHover={{ scale: loading ? 1 : 1.02 }}
+                disabled={loading}
+                className={`w-full py-2.5 rounded-md text-sm font-medium flex items-center justify-center ${
+                  loading
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-indigo-600 hover:bg-indigo-700 text-white"
+                }`}
+              >
+                {loading ? <LoadingSpinner /> : "Login as Admin"}
+              </motion.button>
+
+              {message && (
+                <p
+                  className={`text-sm text-center mt-3 ${
+                    message.includes("✅")
+                      ? "text-green-600"
+                      : "text-red-500"
+                  }`}
+                >
+                  {message}
+                </p>
+              )}
+            </form>
+          </motion.div>
+        </div>
+      </Container>
+    </>
   );
 };
 
