@@ -1,4 +1,3 @@
-// src/pages/Signup.tsx
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import PageHeader from "../components/layout/PageHeader";
@@ -29,20 +28,17 @@ const Signup = () => {
       return false;
     }
 
-    // Basic email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setMessage("Please enter a valid email address.");
       return false;
     }
 
-    // Password length
     if (password.length < 8) {
       setMessage("Password must be at least 8 characters long.");
       return false;
     }
 
-    // Password strength (simple example: contains letters & numbers)
     const strongPassword = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d!@#$%^&*()_+]{8,}$/;
     if (!strongPassword.test(password)) {
       setMessage(
@@ -53,6 +49,15 @@ const Signup = () => {
 
     setMessage("");
     return true;
+  };
+
+  // 🔥 NEW: timeout helper
+  const requestWithTimeout = (promise: Promise<any>, ms = 10000) => {
+    const timeout = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Request timeout")), ms)
+    );
+
+    return Promise.race([promise, timeout]);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -68,7 +73,8 @@ const Signup = () => {
       setMessage("");
       setIsError(false);
 
-      await registerMember(email, password);
+      // 🔥 APPLY TIMEOUT HERE
+      await requestWithTimeout(registerMember(email, password), 10000);
 
       setMessage(
         "✅ Registration successful! Check your email to verify your account."
@@ -78,10 +84,17 @@ const Signup = () => {
       setPassword("");
     } catch (err: any) {
       setIsError(true);
-      setMessage(
-        err?.response?.data?.message ||
-          "Registration failed. Please try again."
-      );
+
+      if (err.message === "Request timeout") {
+        setMessage(
+          "⚠️ Server is taking too long to respond. Please try again."
+        );
+      } else {
+        setMessage(
+          err?.response?.data?.message ||
+            "Registration failed. Please try again."
+        );
+      }
     } finally {
       setLoading(false);
     }
